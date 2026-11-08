@@ -10,38 +10,55 @@ MST v1.2.2 is the current release, including drawing reuse and the FVG display u
 - Treat altered break thresholds, Cement completion rules and confirmation policies as behavior changes requiring explicit design and comparison.
 - Validate experiments in a separate Lab before considering an optional product mode. Listing an experiment here does not authorize implementation or merging it into the published engine.
 
-**Delivered:** v1.2.2 Drawing Reuse, v1.2.1 FVG Display Fix and v1.1.0 Swing Zones. See the [Swing Zones guide](SWING_ZONES.md). v1.2.0 adds optional Break Tolerance; BSL/SSL and sweep observations remain separate backlog items.
+## Delivered releases
 
-## Proposed release sequence
+| Release | Completed scope |
+| --- | --- |
+| v1.0.0 | Cement-based structural engine, BOS/CHoCH, logarithmic Fibonacci, FVG tracking, theme-aware display and illustrated documentation |
+| v1.1.0 — Swing Zones | OTE 0.618–0.786, optional 0.700/0.705 reference, Premium/Discount and geometric Equilibrium |
+| v1.2.0 — Break Tolerance | None / Percent / ATR structural acceptance, previous closed-bar ATR sampling and optional T markers; None retains baseline behavior |
+| v1.2.1 — FVG Display Fix | Display-only union of overlapping/touching same-direction fragments; stored-gap lifecycle and visibility range retained |
+| v1.2.2 — Drawing Reuse | Reuse working boundary arrows, classic Fibonacci line/label pairs and FVG boxes; remove surplus objects and recreate missing handles |
 
-| Target | Focus | Proposed scope |
+FVG display union and drawing reuse are complete. FVG age/count/mitigation controls and long-history storage optimization are separate, unfinished items. Reusing boxes does not reduce stored fragment history.
+
+See the [changelog](../CHANGELOG.md), [Swing Zones](SWING_ZONES.md) and [Break tolerance](BREAK_TOLERANCE.md) for delivered behavior.
+
+## Current work order
+
+This order replaces the earlier release sketch that put Alerts & Display next. Future version numbers will be assigned after scope and compatibility are established; there is no committed v1.3 or v2.0 feature bundle.
+
+| Order | Workstream | Status and next boundary |
 | --- | --- | --- |
-| v1.1 — Swing Zones (delivered) | Shared Fibonacci visualization | OTE + Premium/Discount + Equilibrium |
-| v1.2 — Break Tolerance (delivered) | User-selected structural acceptance | None / Percent / ATR and optional filtered-crossing markers; retain the baseline default |
-| Liquidity — version to be assigned | Observable behavior around structural boundaries | BSL/SSL reference levels + same-bar wick/reclaim sweep markers |
-| v1.3 — Alerts & Display | Event availability and display control | Structural alerts, FVG display improvements, drawing controls and input refinements |
-| v2.0 candidates — Advanced Structure | Separate architectural assessment | EQH/EQL, MSS, Internal Structure and Order Blocks; scope and version not committed |
+| 1 — next design task | Cement completion options | Define and illustrate the existing single opposite Cement, two opposite Cements with intervening bars, consecutive opposite Cements, and confirmation beyond the first opposite Cement's boundary. Design and comparison first; no new completion mode is implemented or selected for release. |
+| 2 | Separate Cement experiment | After rules are agreed, compare a selected candidate with the published baseline in a separate Lab. Assess delay, new extremes, interruption and the subsequent swing chain before deciding whether to offer an optional product mode. |
+| 3 | Boundary observations and quality work | BSL/SSL and sweep overlays remain candidates, alongside drawing controls and measured FVG storage/maintenance work. Select a narrow task based on observed need; these are not prerequisites for Cement research. |
+| 4 | Advanced structure | Assess EQH/EQL, Internal Structure, MSS, Displacement and Order Blocks individually. Dependencies and exact definitions come before implementation. |
+| Last | Alerts | Deferred. OTE contact is the first alert priority when this workstream is opened; structural, Cement and liquidity alerts follow later. |
 
-Bug fixes can be released independently of this sequence. A larger research result does not automatically belong in v2.0; its effect on the structural contract must be assessed first.
+Documentation is maintained alongside each workstream: record completed behavior, update the next task and keep unresolved ideas separate. Bug fixes and measured maintenance can interrupt this order when needed.
 
-P1/P2/P3 below are backlog priorities, not references to the initial audit/cleanup phases. P1 does not mean that every item ships in the next release.
+### Acceptance criteria for the next Cement design
 
-## P1 — additions using the current swing engine
+- Use the existing one-opposite-Cement rule as the comparison baseline; Cement lookback N remains distinct from a count of confirmation candles.
+- Illustrate both UP and DOWN impulses with the extreme bar, first candidate bar and completion bar identified separately.
+- Define intervening-bar rules, candidate reset/expiry, and what happens if a new extreme appears while confirmation is pending.
+- Define interaction with opposite-boundary interruptions and None / Percent / ATR break tolerance.
+- Specify whether a proposal affects initialization, impulse completion or both, and distinguish provisional open-bar observations from closed-bar results.
+- Compare alternatives before selecting one. No default-engine change follows merely from listing or illustrating a candidate.
 
-| Feature | Intended behavior | Design boundary |
+## Overlay and quality backlog
+
+| Item | State | Remaining scope |
 | --- | --- | --- |
-| OTE Zone | Shade the active swing's logarithmic 0.618–0.786 region, with an optional 0.700 or 0.705 reference | Choose the reference ratio and visual controls before implementation; existing individual lines are not an OTE zone |
-| Premium / Discount | Divide the active swing around its logarithmic 0.5 level | Prices above equilibrium are Premium; prices below are Discount, independent of swing direction |
-| Equilibrium | Distinguish the logarithmic 0.5 level | Reuse the same level as Premium/Discount; avoid duplicate calculations and drawings |
-| Liquidity Sweep | Mark a wick above a structural high or below a structural low followed by a close back inside on the same bar | Define the reference snapshot, equality rules, live/closed-bar availability and repeat handling; do not reclassify structural breaks automatically |
-| BSL / SSL | Show potential buy-side/sell-side liquidity reference levels around structural highs/lows | These are inferred price references, not measurements of actual resting orders or proof of liquidity |
-| FVG improvements | Simplify drawings; assess visibility, age and mitigation controls | Distinguish hiding old boxes, removing stored gaps and changing mitigation semantics; preserve a way to compare current fragment behavior |
+| OTE / Premium-Discount / Equilibrium | Delivered v1.1.0 | Maintain logarithmic geometry and independent display controls |
+| FVG visual simplification | Delivered v1.2.1–v1.2.2 | Same-direction union and object reuse complete; additional lifecycle/storage controls are not implemented |
+| BSL / SSL | Backlog | Define structural references and level lifecycle. These are inferred price references, not measurements of resting orders. |
+| Liquidity Sweep | Backlog | Define wick/reclaim references, equality, availability and repeats. Keep separate from T markers and structural acceptance. |
+| Drawing controls / presets | Backlog | Define historical retention and Minimal / Standard / Detailed views without changing calculations silently |
+| FVG resources and controls | Investigation pending | Measure growth and maintenance cost before selecting pruning, age, count or mitigation options; distinguish display filtering from deleting stored gaps |
 
-These features can largely reuse the current swing engine. They still need precise definitions and checks; adding an overlay must not inadvertently change swing formation, event timing or reference selection.
-
-### Suggested first implementation
-
-Start with the shared Swing Zones layer. Define its working-swing anchors, ratio orientation, open-bar updates, colors, labels and object lifecycle together. A narrow first release would add these visualizations without changing any structural predicate or FVG lifecycle rule.
+The categories below retain P2/P3 as relative backlog labels, not a chronological release schedule or references to the original audit phases.
 
 ## P2/P3 — SMC and advanced structure
 
@@ -62,11 +79,11 @@ These feature names are working labels. They do not establish a single universal
 
 ## Research pool — separate from the published engine
 
-Percent minimum penetration and ATR thresholds have been selected for an opt-in v1.2.0 product option; see [Break tolerance](BREAK_TOLERANCE.md). Other experiments below remain separate research and are not scheduled for implementation.
+Percent minimum penetration and ATR thresholds have been selected for an opt-in v1.2.0 product option; see [Break tolerance](BREAK_TOLERANCE.md). Cement completion options are the next design/comparison task. Other candidates below remain research; no experimental completion rule is included in the published source.
 
 ### Gate A — structural break acceptance
 
-The baseline (None) accepts a strict boundary crossing using Close or High/Low. A small excess is still a break. The working source adds selectable Percent and ATR distances without changing that default; other acceptance alternatives remain research.
+The baseline (None) accepts a strict boundary crossing using Close or High/Low. A small excess is still a break. The published source includes selectable Percent and ATR distances without changing that default; other acceptance alternatives remain research.
 
 | Experiment | Candidate rule | Decisions needed |
 | --- | --- | --- |
@@ -80,6 +97,8 @@ The baseline (None) accepts a strict boundary crossing using Close or High/Low. 
 Rejecting a small break does not automatically classify it as a liquidity sweep. These rules also affect references and later swings, not only the label on one candle. Specify whether a candidate holds the old reference and how new extremes are treated while it waits.
 
 ### Gate B — impulse completion / Cement confirmation
+
+The immediate task is to define and illustrate the single-Cement baseline, two-Cement, consecutive-Cement and first-Cement-boundary alternatives. Pivot, retracement and ATR-correction variants remain in the wider research pool.
 
 The current default is one opposite Cement with lookback 1. The existing lookback N compares one close with every high/low of the preceding N bars. It is not a count of confirmation candles and its window is not reset at the start of an impulse.
 
@@ -105,19 +124,20 @@ More confirmation is not automatically more accurate structure. It can merge swi
 
 ## Product quality and supporting work
 
-| Area | Direction |
+| Area | State / direction |
 | --- | --- |
-| Structural Alerts | Separate bullish/bearish BOS and CHoCH events; specify reference, direction, availability and duplicate suppression |
-| Cement Alerts | Decide whether alerts mean every qualifying Cement candle or only structural completion markers |
-| Liquidity Alerts | Follow the agreed sweep rules; add EQH/EQL interactions only after those levels are defined |
-| Confirmation Policy | Distinguish provisional open-bar observations from closed-bar results; do not silently change the current realtime policy |
-| Visual Presets | Explore Minimal / Standard / Detailed layouts without confusing them with the existing Auto/Custom color mode |
-| Drawing Controls | Manage retained swings, FVGs, labels and other objects; distinguish display retention from computational storage |
-| FVG resources | Assess long-history growth and repeated splitting before choosing caps or pruning rules |
-| Reliability | Cover short-history startup, price-domain assumptions, both break sources and Cement lookback 1–10 |
-| Settings Documentation | Keep the existing parameter guide synchronized with every added or changed setting |
+| Drawing reuse | Delivered v1.2.2 for working boundaries, classic Fibonacci and FVG display boxes |
+| Drawing controls | Backlog: user-selected history retention and visual presets |
+| FVG resources | Pending measurement: long-history growth, repeated splitting, searches/removals and storage cost |
+| Reliability | Continue checking short-history startup, both break sources, Cement lookback 1–10 and tolerance modes |
+| Settings documentation | Maintain with each change; current guides already exist |
+| Confirmation policy | Preserve current realtime behavior; specify availability explicitly for any future mode |
 
-Auto/Custom theme colors, input help, and the algorithm/usage/parameter guides already exist in v1.0.0. Future work extends them rather than treating them as missing features.
+## Alerts — deferred, last priority
+
+No alert implementation is scheduled now. When resumed, start with **OTE contact**, then consider BOS/CHoCH, Cement and liquidity alerts.
+
+OTE alert design must select first touch, close inside or re-entry; identify the working/reference swing; define behavior when OTE moves with a new extreme; and prevent repeated notifications while price remains in the same zone. A notification-at-close option must be distinguished from changing the structural engine's realtime evaluation policy.
 
 ## Updating this roadmap
 

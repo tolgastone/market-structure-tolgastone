@@ -46,7 +46,7 @@ Boundary breaks, Cement predicates, and FVG creation/trimming still compare actu
 - [Break tolerance](docs/BREAK_TOLERANCE.md): optional Percent/ATR structural acceptance and T markers.
 - [The MST approach](docs/ALGORITHM.md): structural logic and implementation details.
 - [Chart examples](examples/README.md): light/dark defaults and optional layers.
-- [Roadmap and research ideas](docs/ROADMAP.md): proposed releases, priorities and separate experiments.
+- [Roadmap and research ideas](docs/ROADMAP.md): delivered releases, current work order and separate experiments. Next is Cement completion design/comparison; alerts are deferred, with OTE contact first when resumed.
 - [Changelog](CHANGELOG.md): release notes.
 - [Contributing](CONTRIBUTING.md): reporting issues and proposing changes.
 - [TradingView description](docs/TRADINGVIEW_DESCRIPTION.md): publication text.
