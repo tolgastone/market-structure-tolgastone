@@ -33,6 +33,12 @@ The optional FVG layer detects non-overlap between the first and third candles o
 
 Auto colors adapt to light and dark chart backgrounds. Custom mode provides manual colors. The default layout emphasizes structure with selected Fibonacci levels; Cement markers and FVG fragments can be enabled in settings.
 
+## Live structure without a fixed pivot window
+
+MST evaluates structure on each realtime update without waiting for a fixed number of right-hand candles to confirm a fractal pivot. Impulse completion follows opposite-direction Cement, so confirmation time depends on price action rather than a preset future-bar count.
+
+Open-bar results remain provisional and can change before close. Completed swings are drawn back to their tracked extremes; those endpoints were not confirmed at the earlier extreme bar. This is not a claim of zero delay or non-repainting behavior.
+
 ## Timing
 
 Close mode selects the current close as the break source; it does not restrict evaluation to bar close. Open-bar results can change. Completed swing endpoints are drawn at the earlier extreme, and centered break labels do not represent an earlier signal. Working boundary arrows can differ from the reference boundaries used for break detection.

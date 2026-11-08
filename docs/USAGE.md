@@ -57,6 +57,12 @@ Turning **Show FVG fragments** off hides the boxes but leaves tracking active. T
 
 ## Separate chart position from availability
 
+### Live evaluation and confirmation
+
+MST evaluates structure on each realtime update without waiting for a fixed number of right-hand candles to confirm a fractal pivot. Impulse completion follows opposite-direction Cement, so confirmation time depends on price action rather than a preset future-bar count.
+
+Open-bar results remain provisional and can change before close. Completed swings are drawn back to their tracked extremes; those endpoints were not confirmed at the earlier extreme bar. This is not a claim of zero delay or non-repainting behavior.
+
 On an open bar, Close is the changing current price. Breaks, Cement predicates, FVGs and drawings can change before the bar closes. The script does not enforce close-only confirmation.
 
 A swing drawn at an earlier extreme becomes visible only when the engine draws it on a later completion or interruption. A BOS/CHoCH label is centered along its dashed line; use the line's right endpoint to identify its break bar. Do not treat label position as an earlier signal.

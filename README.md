@@ -41,6 +41,12 @@ The on-chart title is **Market Structure by tolgastone**, with the short title *
 
 ## Timing and interpretation
 
+### Live structure without a fixed pivot window
+
+MST evaluates structure on each realtime update without waiting for a fixed number of right-hand candles to confirm a fractal pivot. Impulse completion follows opposite-direction Cement, so confirmation time depends on price action rather than a preset future-bar count.
+
+Open-bar results remain provisional and can change before close. Completed swings are drawn back to their tracked extremes; those endpoints were not confirmed at the earlier extreme bar. This is not a claim of zero delay or non-repainting behavior.
+
 - Close mode selects the price source; it does not restrict evaluation to bar close. Open-bar breaks, Cement markers, and FVGs can change before close.
 - Completed swing endpoints can be drawn on earlier extreme bars. A historical endpoint or centered BOS/CHoCH label does not show when the event first became available.
 - Current boundary arrows follow the working swing; break detection uses the reference swing.

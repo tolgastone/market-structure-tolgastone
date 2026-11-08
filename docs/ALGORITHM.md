@@ -91,6 +91,12 @@ Storage is maintained even when FVG display is hidden. Display requires the enti
 
 ## Availability and current limits
 
+### Realtime evaluation versus pivot-window confirmation
+
+MST evaluates structure on each realtime update without waiting for a fixed number of right-hand candles to confirm a fractal pivot. Impulse completion follows opposite-direction Cement, so confirmation time depends on price action rather than a preset future-bar count.
+
+Open-bar results remain provisional and can change before close. Completed swings are drawn back to their tracked extremes; those endpoints were not confirmed at the earlier extreme bar. This is not a claim of zero delay or non-repainting behavior.
+
 Open-bar breaks, Cement predicates, FVGs and drawings can change before close. No close-confirmation guard is applied. Three different times must be distinguished: the extreme bar, the completion/break bar, and the moment an observation becomes final at close.
 
 The script allows up to 500 lines, 500 labels and 500 boxes. Older drawings may disappear as budgets are reached. FVG storage has no explicit age or count cap. Very short loaded histories may not establish a reference swing. Long histories and repeated gap splitting can increase resource use; the script does not cap stored FVG age or count.
