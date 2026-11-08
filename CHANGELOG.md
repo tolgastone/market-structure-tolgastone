@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.0.0 — 2026-11-08
+
 ### Initial release
 
 - Cement-based market structure with tracked swing boundaries and impulse extremes.

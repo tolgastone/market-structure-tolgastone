@@ -16,6 +16,8 @@ Fibonacci levels use logarithmic prices: 0.5 is a geometric midpoint. FVG tracki
 
 Read [The MST approach](docs/ALGORITHM.md) for the structural cycle, an example, and the implementation details behind the drawings.
 
+**Current release:** [v1.0.0](https://github.com/tolgastone/market-structure-tolgastone/releases/tag/v1.0.0).
+
 ## Documentation
 
 - [Illustrated concepts](docs/CONCEPTS.md): Cement candles, BOS, CHoCH and FVG.
