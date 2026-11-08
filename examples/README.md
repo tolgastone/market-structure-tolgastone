@@ -29,3 +29,13 @@ The [illustrated concepts guide](../docs/CONCEPTS.md) walks through upward and d
 - [UP impulse before Cement](swing-up-before-cement.png) and [after bearish Cement](swing-up-after-cement.png).
 - [DOWN impulse before Cement](swing-down-before-cement.png) and [after bullish Cement](swing-down-after-cement.png).
 - [Actual BOS/CHoCH break candles](break-candles.png).
+
+## Swing Zones — v1.1 release candidate
+
+These examples show the new working-swing display layer with FVG also enabled. They are separate from the v1.0.0 default examples above; they are visual illustrations, not trading instructions.
+
+- [NYSE:XYZ · 1W · UP / light](zones-up-light.png): high 99.26, low 38.85, logarithmic EQ approximately 62.10.
+- [NASDAQ:FLYW · 1W · DOWN / light](zones-down-light.png) and [dark](zones-down-dark.png): high 35.80, low 8.20, EQ approximately 17.13 and 0.700 approximately 23.01.
+- [Nasdaq-100 · 1W · DOWN / dark](zones-index-dark.png): OTE in Premium, with FVG fragments displayed separately.
+
+See the [Swing Zones guide](../docs/SWING_ZONES.md) for anchors, visibility and timing.

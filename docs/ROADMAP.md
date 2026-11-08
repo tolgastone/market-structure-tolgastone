@@ -10,6 +10,8 @@ MST v1.0.0 is the published baseline. This document is the working backlog for f
 - Treat altered break thresholds, Cement completion rules and confirmation policies as behavior changes requiring explicit design and comparison.
 - Validate experiments in a separate Lab before considering an optional product mode. Listing an experiment here does not authorize implementation or merging it into the published engine.
 
+**Current work:** v1.1 Swing Zones has passed the initial compilation and visual review and is being prepared for release. It is not yet released; acceptance checks are listed in the [development guide](SWING_ZONES.md).
+
 ## Proposed release sequence
 
 | Target | Focus | Proposed scope |

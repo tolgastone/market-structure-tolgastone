@@ -30,11 +30,13 @@ The chart's linear/log price-axis setting does not change these formulas. All pr
 
 Boundary breaks, Cement predicates, and FVG creation/trimming still compare actual OHLC prices directly. Logarithmic geometry does not replace those structural rules or make FVG detection a logarithmic interpolation.
 
+**Next release candidate:** [v1.1 Swing Zones](docs/SWING_ZONES.md) adds OTE, Premium/Discount and Equilibrium as a display-only layer. Compilation and reviewed light/dark examples passed; the current published release remains v1.0.0.
+
 ## Documentation
 
 - [Illustrated concepts](docs/CONCEPTS.md): Cement candles, BOS, CHoCH and FVG.
 - [Usage guide](docs/USAGE.md): setup, chart reading, timing and common questions.
-- [Parameter reference](docs/PARAMETERS.md): all 33 controls, defaults and effects.
+- [Parameter reference](docs/PARAMETERS.md): published settings and the v1.1 development controls, defaults and effects.
 - [The MST approach](docs/ALGORITHM.md): structural logic and implementation details.
 - [Chart examples](examples/README.md): light/dark defaults and optional layers.
 - [Roadmap and research ideas](docs/ROADMAP.md): proposed releases, priorities and separate experiments.

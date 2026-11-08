@@ -1,6 +1,6 @@
 # Parameter reference
 
-These names and defaults match the current [`ms_tolgastone.pine`](../ms_tolgastone.pine). The indicator exposes **33 inputs in five groups**. The shipped view emphasizes structure: Cement markers and FVG fragments are hidden; only optional Fibonacci ratios 0.5, 0.618 and 0.786 are enabled.
+These names and defaults match the current [`ms_tolgastone.pine`](../ms_tolgastone.pine). The indicator exposes **41 inputs in six groups** in the v1.1 development source. The published v1.0.0 source has 33 inputs; the development source adds eight Swing Zones controls. The classic view emphasizes structure: Cement markers and FVG fragments are hidden; only optional Fibonacci ratios 0.5, 0.618 and 0.786 are enabled.
 
 ## Appearance — 3 inputs
 
@@ -59,7 +59,7 @@ Two further controls apply to the layer:
 
 Levels 0 and 1 are always added when the Fibonacci layer is shown; they have no individual Enable controls. The editable levels are used in their configured order, without sorting or deduplication. Duplicate ratios can create overlapping drawings.
 
-Prices are interpolated logarithmically. Ratio 0.5 is the geometric midpoint. Displayed 0.618 and 0.786 levels do not constitute a dedicated OTE zone. Very large ratio values can produce extreme coordinates; no additional ratio validation is implemented.
+Prices are interpolated logarithmically. Ratio 0.5 is the geometric midpoint. Classic 0.618 and 0.786 lines alone are not the dedicated OTE band; the separate Swing Zones layer provides that band in v1.1 development. Very large ratio values can produce extreme coordinates; no additional ratio validation is implemented.
 
 ## Fair value gaps — 3 inputs
 
@@ -70,6 +70,21 @@ Prices are interpolated logarithmically. Ratio 0.5 is the geometric midpoint. Di
 | Bullish fragment color | Teal `#087F7A`; transparency 90 | Appearance of bullish fragments in Custom mode. |
 
 Color transparency uses the Pine scale: 0 is opaque and 100 is invisible. No gap-age, minimum-size, mitigation-mode or storage-limit inputs are provided.
+
+## Swing Zones — 8 inputs (v1.1 development)
+
+| Setting | Default | Effect |
+| --- | --- | --- |
+| Premium / Discount | On | Subtle higher/lower-price halves around geometric equilibrium, independent of direction. |
+| Equilibrium (0.5) | On | Dashed midpoint line and EQ/price label. |
+| OTE zone (0.618–0.786) | On | Fixed logarithmic retracement band on the working swing. |
+| OTE reference | 0.700 | Off, 0.700 or 0.705; dotted line and reference text inside visible OTE. |
+| Premium fill | Coral #BA4C52; transparency 95 | Premium fill in Custom mode. |
+| Discount fill | Teal #087F7A; transparency 95 | Discount fill in Custom mode. |
+| OTE fill | Purple #7760AA; transparency 84 | OTE fill in Custom mode. |
+| Equilibrium color | Slate #64748B | EQ line and all Swing Zones text in Custom mode. |
+
+Auto uses transparency 95/94 for Premium/Discount and 84/82 for OTE on light/dark backgrounds. OTE reference lines use the OTE hue with transparency 20. Zones are independent of classic Fibonacci visibility and editable ratios. Matching classic labels are omitted while their dedicated zone annotations are visible, then restored when disabled. See [Swing Zones](SWING_ZONES.md).
 
 ## What the settings do not change
 

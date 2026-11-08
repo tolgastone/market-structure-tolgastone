@@ -26,6 +26,7 @@ var group_STRUCTURAL = "Structure"
 var group_VISUAL     = "Structure display"
 var group_FIBO       = "Fibonacci"
 var group_FVG        = "Fair value gaps"
+var group_ZONES      = "Swing Zones"
 
 // Auto follows the chart background; Custom uses the color controls below.
 i_colorMode = input.string(
@@ -139,6 +140,26 @@ i_boundaryColor = input.color(color.new(#4773A8, 40), "Boundary color", group = 
 
 i_lineWidth             = input.int(1, title = "Structure line width", minval = 1, maxval = 5, step = 1, group = group_VISUAL, display = display.data_window)
 
+// Swing Zones are independent of the classic editable Fibonacci levels.
+i_showPremiumDiscount = input.bool(
+    true, "Premium / Discount", group = group_ZONES,
+    tooltip = "Shade prices above/below the working swing geometric midpoint. Follows the working swing, including provisional open-bar updates."
+)
+i_showEquilibrium = input.bool(true, "Equilibrium (0.5)", group = group_ZONES)
+i_showOTE = input.bool(
+    true, "OTE zone (0.618–0.786)", group = group_ZONES,
+    tooltip = "Logarithmic retracement band: Discount for an UP swing, Premium for a DOWN swing. Independent of the editable Fibonacci ratios."
+)
+i_oteReference = input.string(
+    "0.700", "OTE reference", ["Off", "0.700", "0.705"], group = group_ZONES,
+    tooltip = "Optional dotted reference inside the OTE band. Shown only when OTE is enabled.",
+    display = display.data_window
+)
+i_premiumColor = input.color(color.new(#BA4C52, 95), "Premium fill", group = group_ZONES)
+i_discountColor = input.color(color.new(#087F7A, 95), "Discount fill", group = group_ZONES)
+i_oteColor = input.color(color.new(#7760AA, 84), "OTE fill", group = group_ZONES)
+i_equilibriumColor = input.color(#64748B, "Equilibrium color", group = group_ZONES)
+
 // =============================================================================
 // THEME-AWARE DISPLAY COLORS
 // =============================================================================
@@ -154,6 +175,13 @@ fiboTextColor  = useAutoColors and not isLightBackground ? #CBD5E1 : fiboColor
 boundaryColor  = useAutoColors ? color.new(structureColor, 40) : i_boundaryColor
 fvgUpColor     = useAutoColors ? color.new(bullColor, isLightBackground ? 90 : 87) : i_fvgUpColor
 fvgDownColor   = useAutoColors ? color.new(bearColor, isLightBackground ? 90 : 87) : i_fvgDownColor
+
+premiumFillColor = useAutoColors ? color.new(bearColor, isLightBackground ? 95 : 94) : i_premiumColor
+discountFillColor = useAutoColors ? color.new(bullColor, isLightBackground ? 95 : 94) : i_discountColor
+oteFillColor = useAutoColors ? color.new(isLightBackground ? #7760AA : #B9A4DF, isLightBackground ? 84 : 82) : i_oteColor
+equilibriumColor = useAutoColors ? (isLightBackground ? #64748B : #CBD5E1) : i_equilibriumColor
+zoneTextColor = useAutoColors ? chart.fg_color : i_equilibriumColor
+oteReferenceColor = color.new(oteFillColor, 20)
 
 // =============================================================================
 // DATA TYPES
@@ -218,6 +246,57 @@ get_swing_range_double_log(Swing s) =>
     fvgRangeHigh = math.exp(swingHighLog + swingRange)
     fvgRangeLow  = math.exp(swingLowLog - swingRange)
     [fvgRangeHigh, fvgRangeLow]
+
+// =============================================================================
+// SWING ZONE DRAWING HELPERS
+// =============================================================================
+// Match the existing logarithmic Fibonacci formulas without changing swing state.
+get_zone_level(Swing s, float ratio) =>
+    float logHigh = math.log(s.swingHigh.myHigh)
+    float logLow = math.log(s.swingLow.myLow)
+    s.direction == Direction.UP ? math.exp(logHigh - (logHigh - logLow) * ratio) : math.exp(logLow + (logHigh - logLow) * ratio)
+
+// Dedicated annotations replace matching classic levels to avoid stacked labels.
+zone_owns_ratio(float ratio, bool validSwing) =>
+    float reference = i_oteReference == "0.705" ? 0.705 : 0.700
+    bool ownsEquilibrium = i_showEquilibrium and ratio == 0.5
+    bool ownsOTE = i_showOTE and (ratio == 0.618 or ratio == 0.786 or (i_oteReference != "Off" and ratio == reference))
+    validSwing and (ownsEquilibrium or ownsOTE)
+
+// Reuse a bounded set of objects; recreate a handle if platform GC removed it.
+update_zone_box(box existing, int leftBar, int rightBar, float topPrice, float bottomPrice, color fillColor) =>
+    box result = existing
+    if na(result) or not array.includes(box.all, result)
+        result := box.new(leftBar, topPrice, rightBar, bottomPrice, border_width = 0, bgcolor = fillColor)
+    else
+        box.set_lefttop(result, leftBar, topPrice)
+        box.set_rightbottom(result, rightBar, bottomPrice)
+        box.set_bgcolor(result, fillColor)
+    result
+
+update_zone_line(line existing, int leftBar, int rightBar, float price, color lineColor, string lineStyle) =>
+    line result = existing
+    if na(result) or not array.includes(line.all, result)
+        result := line.new(leftBar, price, rightBar, price, color = lineColor, style = lineStyle, width = 1)
+    else
+        line.set_xy1(result, leftBar, price)
+        line.set_xy2(result, rightBar, price)
+        line.set_color(result, lineColor)
+        line.set_style(result, lineStyle)
+    result
+
+update_zone_label(label existing, int labelBar, float price, string labelText, color textColor) =>
+    label result = existing
+    if na(result) or not array.includes(label.all, result)
+        result := label.new(
+            labelBar, price, labelText, style = label.style_label_left,
+            color = color.new(color.black, 100), textcolor = textColor, size = size.small
+        )
+    else
+        label.set_xy(result, labelBar, price)
+        label.set_text(result, labelText)
+        label.set_textcolor(result, textColor)
+    result
 
 // =============================================================================
 // DRAWING HELPERS
@@ -512,6 +591,17 @@ var label[] fiboLabels      = array.new<label>()
 var line[]  swingLimitLines = array.new<line>()
 var box[]   fvgBoxes        = array.new<box>()
 
+// At most three boxes, two lines and four labels for the current swing only.
+var box premiumBox = na
+var box discountBox = na
+var box oteBox = na
+var line equilibriumLine = na
+var line oteReferenceLine = na
+var label premiumLabel = na
+var label discountLabel = na
+var label equilibriumLabel = na
+var label oteLabel = na
+
 // =============================================================================
 // INITIALIZATION
 // =============================================================================
@@ -688,23 +778,28 @@ check_fvg(fvgArr)
 // =============================================================================
 // Display boundaries follow currentSwing; break predicates use lastSwing.
 if barstate.islast
+    // Drawing-only validation: never feeds back into the structural engine.
+    bool zonesValid = not na(currentSwing) and not na(currentSwing.swingHigh) and not na(currentSwing.swingLow)
+    zonesValid := zonesValid and not na(currentSwing.direction)
+    zonesValid := zonesValid and currentSwing.swingLow.myLow > 0 and currentSwing.swingHigh.myHigh > currentSwing.swingLow.myLow
+
     array.clear(fiboLevels)
     array.push(fiboLevels, 0.0)
-    if i_showFiboL2
+    if i_showFiboL2 and not zone_owns_ratio(i_fiboL2, zonesValid)
         array.push(fiboLevels, i_fiboL2)
-    if i_showFiboL3
+    if i_showFiboL3 and not zone_owns_ratio(i_fiboL3, zonesValid)
         array.push(fiboLevels, i_fiboL3)
-    if i_showFiboL4
+    if i_showFiboL4 and not zone_owns_ratio(i_fiboL4, zonesValid)
         array.push(fiboLevels, i_fiboL4)
-    if i_showFiboL5
+    if i_showFiboL5 and not zone_owns_ratio(i_fiboL5, zonesValid)
         array.push(fiboLevels, i_fiboL5)
-    if i_showFiboL6
+    if i_showFiboL6 and not zone_owns_ratio(i_fiboL6, zonesValid)
         array.push(fiboLevels, i_fiboL6)
-    if i_showFiboL7
+    if i_showFiboL7 and not zone_owns_ratio(i_fiboL7, zonesValid)
         array.push(fiboLevels, i_fiboL7)
-    if i_showFiboL8
+    if i_showFiboL8 and not zone_owns_ratio(i_fiboL8, zonesValid)
         array.push(fiboLevels, i_fiboL8)
-    if i_showFiboL9
+    if i_showFiboL9 and not zone_owns_ratio(i_fiboL9, zonesValid)
         array.push(fiboLevels, i_fiboL9)
     array.push(fiboLevels, 1.0)
 
@@ -716,3 +811,72 @@ if barstate.islast
     if i_showFvgs
         [fvgRangeHigh, fvgRangeLow] = get_swing_range_double_log(lastSwing)
         draw_fvgs(fvgArr, fvgBoxes, fvgRangeHigh, fvgRangeLow, fvgUpColor, fvgDownColor)
+
+    // Zones extend from the active extreme to the same right edge as the boundaries.
+    int zoneRight = bar_index + 10
+    int zoneLabelBar = bar_index + 12
+    int zoneLeft = bar_index
+    float zoneHigh = na
+    float zoneLow = na
+    float equilibrium = na
+    float oteTop = na
+    float oteBottom = na
+    float oteReference = na
+    float premiumLabelPrice = na
+    float discountLabelPrice = na
+    if zonesValid
+        zoneHigh := currentSwing.swingHigh.myHigh
+        zoneLow := currentSwing.swingLow.myLow
+        zoneLeft := math.max(currentSwing.direction == Direction.UP ? currentSwing.swingHigh.myIndex : currentSwing.swingLow.myIndex, bar_index - 9999)
+        equilibrium := get_zone_level(currentSwing, 0.5)
+        float ote618 = get_zone_level(currentSwing, 0.618)
+        float ote786 = get_zone_level(currentSwing, 0.786)
+        oteTop := math.max(ote618, ote786)
+        oteBottom := math.min(ote618, ote786)
+        oteReference := get_zone_level(currentSwing, i_oteReference == "0.705" ? 0.705 : 0.700)
+        // Place PD labels near the outer edges, away from EQ and OTE labels.
+        premiumLabelPrice := math.exp(math.log(zoneHigh) - (math.log(zoneHigh) - math.log(zoneLow)) * 0.10)
+        discountLabelPrice := math.exp(math.log(zoneLow) + (math.log(zoneHigh) - math.log(zoneLow)) * 0.10)
+
+    if zonesValid and i_showPremiumDiscount
+        premiumBox := update_zone_box(premiumBox, zoneLeft, zoneRight, zoneHigh, equilibrium, premiumFillColor)
+        discountBox := update_zone_box(discountBox, zoneLeft, zoneRight, equilibrium, zoneLow, discountFillColor)
+        premiumLabel := update_zone_label(premiumLabel, zoneLabelBar, premiumLabelPrice, "Premium", zoneTextColor)
+        discountLabel := update_zone_label(discountLabel, zoneLabelBar, discountLabelPrice, "Discount", zoneTextColor)
+    else
+        box.delete(premiumBox)
+        box.delete(discountBox)
+        label.delete(premiumLabel)
+        label.delete(discountLabel)
+        premiumBox := na
+        discountBox := na
+        premiumLabel := na
+        discountLabel := na
+
+    // Draw OTE after the subtle PD fills so the band retains its visual emphasis.
+    if zonesValid and i_showOTE
+        oteBox := update_zone_box(oteBox, zoneLeft, zoneRight, oteTop, oteBottom, oteFillColor)
+        string oteText = "OTE 0.618–0.786"
+        if i_oteReference != "Off"
+            oteText := oteText + "\n" + i_oteReference + " · " + str.tostring(oteReference, format.mintick)
+        oteLabel := update_zone_label(oteLabel, zoneLabelBar, math.exp((math.log(oteTop) + math.log(oteBottom)) / 2), oteText, zoneTextColor)
+    else
+        box.delete(oteBox)
+        label.delete(oteLabel)
+        oteBox := na
+        oteLabel := na
+
+    if zonesValid and i_showOTE and i_oteReference != "Off"
+        oteReferenceLine := update_zone_line(oteReferenceLine, zoneLeft, zoneRight, oteReference, oteReferenceColor, line.style_dotted)
+    else
+        line.delete(oteReferenceLine)
+        oteReferenceLine := na
+
+    if zonesValid and i_showEquilibrium
+        equilibriumLine := update_zone_line(equilibriumLine, zoneLeft, zoneRight, equilibrium, equilibriumColor, line.style_dashed)
+        equilibriumLabel := update_zone_label(equilibriumLabel, zoneLabelBar, equilibrium, "EQ · 0.5\n" + str.tostring(equilibrium, format.mintick), zoneTextColor)
+    else
+        line.delete(equilibriumLine)
+        label.delete(equilibriumLabel)
+        equilibriumLine := na
+        equilibriumLabel := na
