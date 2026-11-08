@@ -30,7 +30,7 @@ The [illustrated concepts guide](../docs/CONCEPTS.md) walks through upward and d
 - [DOWN impulse before Cement](swing-down-before-cement.png) and [after bullish Cement](swing-down-after-cement.png).
 - [Actual BOS/CHoCH break candles](break-candles.png).
 
-## Swing Zones — v1.1 release candidate
+## Swing Zones — v1.1.0
 
 These examples show the new working-swing display layer with FVG also enabled. They are separate from the v1.0.0 default examples above; they are visual illustrations, not trading instructions.
 

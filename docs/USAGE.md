@@ -8,7 +8,7 @@ MST displays structural swings, boundary breaks, Cement markers, logarithmic Fib
 2. Copy the complete contents of [`ms_tolgastone.pine`](../ms_tolgastone.pine) into a new Pine Editor indicator script.
 3. Save the script and add it to the chart. No separate library is required.
 4. Start with **Break source = Close** and **Cement lookback bars = 1**, the current defaults.
-5. Leave **Color mode = Auto** to follow the chart background, or select **Custom** to use the color controls. The shipped view shows swings, extreme markers, breaks, boundaries and Fibonacci levels 0, 0.5, 0.618, 0.786 and 1. Cement markers and FVG fragments start hidden. Open the indicator settings to choose additional layers. See the [parameter reference](PARAMETERS.md) for every control.
+5. Leave **Color mode = Auto** to follow the chart background, or select **Custom** to use the color controls. The default view shows swings, extreme markers, breaks, boundaries and Swing Zones. EQ and OTE provide the dedicated 0.5 and 0.618–0.786 annotations; matching classic Fibonacci labels are omitted while these layers are enabled. Cement markers and FVG fragments start hidden. Open the indicator settings to choose additional layers. See the [parameter reference](PARAMETERS.md) for every control.
 
 The same Auto palette adapts to light and dark chart backgrounds; there are no separate Light/Dark presets.
 
@@ -39,9 +39,9 @@ With lookback 1, bullish Cement means the current close is strictly above the pr
 
 Lookback 3 does not mean three consecutive Cement candles. An UP impulse normally completes on bearish Cement; a DOWN impulse normally completes on bullish Cement. Hiding markers does not disable this logic.
 
-## Swing Zones (v1.1 development)
+## Swing Zones (v1.1.0)
 
-The new [Swing Zones layer](SWING_ZONES.md) adds independent OTE, Premium/Discount and Equilibrium displays. It follows the working swing and can change during an open bar. Zones remain visible independently of classic Fibonacci. Matching classic ratio annotations are replaced while the dedicated layers are enabled. The published v1.0.0 release does not include these controls.
+The new [Swing Zones layer](SWING_ZONES.md) adds independent OTE, Premium/Discount and Equilibrium displays. It follows the working swing and can change during an open bar. Zones remain visible independently of classic Fibonacci. Matching classic ratio annotations are replaced while the dedicated layers are enabled. These controls were introduced in v1.1.0.
 
 ## Add Fibonacci context
 
@@ -49,7 +49,7 @@ Enable **Show Fibonacci levels** to display the working swing's logarithmic rati
 
 The levels use log prices, so 0.5 is the geometric midpoint rather than the arithmetic midpoint. For an UP swing, ratio 0 is the high and ratio 1 is the low; for a DOWN swing, ratio 0 is the low and ratio 1 is the high. Ratios below 0 and above 1 extend beyond the swing range.
 
-The classic numeric 0.618 and 0.786 lines are individual levels; the dedicated OTE band is provided separately by Swing Zones in v1.1 development. **Fibonacci color** and **Boundary color** are independent controls in Custom mode. Auto supplies separate muted colors for both layers.
+The classic numeric 0.618 and 0.786 lines are individual levels; the dedicated OTE band is provided separately by Swing Zones in v1.1.0. **Fibonacci color** and **Boundary color** are independent controls in Custom mode. Auto supplies separate muted colors for both layers.
 
 The logarithmic formulas remain in use whether the chart price axis is linear or logarithmic; there is no linear-Fibonacci mode. For example, a 100–200 swing has its 0.5 level near 141.42, not 150. The FVG display-range filter also uses log-price geometry. This does not change the direct OHLC comparisons used for breaks, Cement or gap maintenance.
 

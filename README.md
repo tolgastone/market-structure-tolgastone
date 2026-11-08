@@ -18,7 +18,7 @@ Fibonacci levels use logarithmic prices: 0.5 is a geometric midpoint. FVG tracki
 
 Read [The MST approach](docs/ALGORITHM.md) for the structural cycle, an example, and the implementation details behind the drawings.
 
-**Current release:** [v1.0.0](https://github.com/tolgastone/market-structure-tolgastone/releases/tag/v1.0.0).
+**Current release:** [v1.1.0 — Swing Zones](https://github.com/tolgastone/market-structure-tolgastone/releases/tag/v1.1.0).
 
 ## Logarithmic price geometry
 
@@ -30,13 +30,13 @@ The chart's linear/log price-axis setting does not change these formulas. All pr
 
 Boundary breaks, Cement predicates, and FVG creation/trimming still compare actual OHLC prices directly. Logarithmic geometry does not replace those structural rules or make FVG detection a logarithmic interpolation.
 
-**Next release candidate:** [v1.1 Swing Zones](docs/SWING_ZONES.md) adds OTE, Premium/Discount and Equilibrium as a display-only layer. Compilation and reviewed light/dark examples passed; the current published release remains v1.0.0.
+[Swing Zones](docs/SWING_ZONES.md) adds OTE, Premium/Discount and Equilibrium as a display-only layer. Premium is always above the geometric midpoint and Discount below it; OTE follows the swing direction.
 
 ## Documentation
 
 - [Illustrated concepts](docs/CONCEPTS.md): Cement candles, BOS, CHoCH and FVG.
 - [Usage guide](docs/USAGE.md): setup, chart reading, timing and common questions.
-- [Parameter reference](docs/PARAMETERS.md): published settings and the v1.1 development controls, defaults and effects.
+- [Parameter reference](docs/PARAMETERS.md): all 41 controls, defaults and effects.
 - [The MST approach](docs/ALGORITHM.md): structural logic and implementation details.
 - [Chart examples](examples/README.md): light/dark defaults and optional layers.
 - [Roadmap and research ideas](docs/ROADMAP.md): proposed releases, priorities and separate experiments.
@@ -48,7 +48,7 @@ Boundary breaks, Cement predicates, and FVG creation/trimming still compare actu
 
 Copy `ms_tolgastone.pine` into a new TradingView Pine script, save it, and add it to a standard candlestick chart. The script is self-contained and has no imported library or external-timeframe data requests. Add moving averages or other indicators separately if desired.
 
-The default Auto palette adapts to light/dark chart backgrounds. The initial view emphasizes structure, with Cement markers and FVG fragments hidden and only the 0.5, 0.618 and 0.786 optional Fibonacci ratios enabled. Select Custom to use manual colors.
+Swing Zones are enabled by default and can be switched independently of classic Fibonacci. The default Auto palette adapts to light/dark chart backgrounds. The initial view emphasizes structure, with Cement markers and FVG fragments hidden and only the 0.5, 0.618 and 0.786 optional Fibonacci ratios enabled. Select Custom to use manual colors.
 
 The on-chart title is **Market Structure by tolgastone**, with the short title **MST**.
 

@@ -2,14 +2,14 @@
 
 ## Unreleased
 
-### Added — v1.1 release candidate
+## 1.1.0 — 2026-11-08
+
+### Added
 
 - Working-swing OTE, Premium/Discount and Equilibrium layers using logarithmic prices.
 - Independent visibility, Auto/Custom colors and optional 0.700/0.705 OTE reference.
 - Bounded reusable drawings and suppression of matching classic Fibonacci annotations.
 - Structural engine, Cement, break rules and FVG maintenance unchanged.
-
-Compilation, reviewed UP/DOWN light/dark examples, layer switches and OTE reference options passed the preparation checks. These additions are not yet published.
 
 ### Documentation
 

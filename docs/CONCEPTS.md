@@ -86,4 +86,4 @@ The diagram shades the formation interval for explanation. On the actual MST cha
 
 The closed Cement candle provides the final close-based predicate described above. The script also evaluates on open-bar updates, so provisional results can appear or change before close; it does not enforce close-only processing. These chart excerpts explain the sequence rather than record every intrabar update.
 
-Swings, extreme points, BOS/CHoCH, working boundaries and selected Fibonacci levels are visible by default. Enable Cement markers and FVG fragments in settings to study the optional layers. See the [usage guide](USAGE.md) and [parameter reference](PARAMETERS.md).
+Swings, extreme points, BOS/CHoCH, working boundaries and Swing Zones are visible by default in v1.1.0. The [Swing Zones guide](SWING_ZONES.md) explains OTE, Premium/Discount and Equilibrium. Enable Cement markers and FVG fragments in settings to study the optional layers. See the [usage guide](USAGE.md) and [parameter reference](PARAMETERS.md).

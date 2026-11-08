@@ -1,6 +1,6 @@
 # Roadmap and research ideas
 
-MST v1.0.0 is the published baseline. This document is the working backlog for future releases and separate experiments. It records direction, not a promise of delivery dates or a claim that the listed features already exist. Priorities and proposed versions can change as the design and evidence develop.
+MST v1.1.0 is the current release; the structural engine remains the v1.0.0 baseline. This document is the working backlog for future releases and separate experiments. It records direction, not a promise of delivery dates or a claim that the listed features already exist. Priorities and proposed versions can change as the design and evidence develop.
 
 ## Development principles
 
@@ -10,13 +10,13 @@ MST v1.0.0 is the published baseline. This document is the working backlog for f
 - Treat altered break thresholds, Cement completion rules and confirmation policies as behavior changes requiring explicit design and comparison.
 - Validate experiments in a separate Lab before considering an optional product mode. Listing an experiment here does not authorize implementation or merging it into the published engine.
 
-**Current work:** v1.1 Swing Zones has passed the initial compilation and visual review and is being prepared for release. It is not yet released; acceptance checks are listed in the [development guide](SWING_ZONES.md).
+**Delivered:** v1.1.0 Swing Zones. See the [Swing Zones guide](SWING_ZONES.md). The next proposed feature milestone is v1.2 Liquidity.
 
 ## Proposed release sequence
 
 | Target | Focus | Proposed scope |
 | --- | --- | --- |
-| v1.1 — Swing Zones | Shared Fibonacci visualization | OTE + Premium/Discount + Equilibrium |
+| v1.1 — Swing Zones (delivered) | Shared Fibonacci visualization | OTE + Premium/Discount + Equilibrium |
 | v1.2 — Liquidity | Observable behavior around structural boundaries | BSL/SSL reference levels + same-bar wick/reclaim sweep markers |
 | v1.3 — Alerts & Display | Event availability and display control | Structural alerts, FVG display improvements, drawing controls and input refinements |
 | v2.0 candidates — Advanced Structure | Separate architectural assessment | EQH/EQL, MSS, Internal Structure and Order Blocks; scope and version not committed |

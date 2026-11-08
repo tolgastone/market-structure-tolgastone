@@ -1,6 +1,6 @@
-# Swing Zones — v1.1 release candidate
+# Swing Zones — v1.1.0
 
-Swing Zones is a display layer for the existing working swing. It does not change reference-boundary breaks, Cement, swing construction or FVG maintenance. The release candidate has passed the reviewed TradingView compilation and visual checks. It has not replaced the published v1.0.0 release.
+Swing Zones is a display layer for the existing working swing. It does not change reference-boundary breaks, Cement, swing construction or FVG maintenance. Swing Zones is included in v1.1.0.
 
 ## Three independent layers
 

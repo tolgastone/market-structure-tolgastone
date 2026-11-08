@@ -1,6 +1,6 @@
 # Parameter reference
 
-These names and defaults match the current [`ms_tolgastone.pine`](../ms_tolgastone.pine). The indicator exposes **41 inputs in six groups** in the v1.1 development source. The published v1.0.0 source has 33 inputs; the development source adds eight Swing Zones controls. The classic view emphasizes structure: Cement markers and FVG fragments are hidden; only optional Fibonacci ratios 0.5, 0.618 and 0.786 are enabled.
+These names and defaults match the current [`ms_tolgastone.pine`](../ms_tolgastone.pine). The indicator exposes **41 inputs in six groups** in v1.1.0, including eight Swing Zones controls. The classic view emphasizes structure: Cement markers and FVG fragments are hidden; only optional Fibonacci ratios 0.5, 0.618 and 0.786 are enabled.
 
 ## Appearance — 3 inputs
 
@@ -59,7 +59,7 @@ Two further controls apply to the layer:
 
 Levels 0 and 1 are always added when the Fibonacci layer is shown; they have no individual Enable controls. The editable levels are used in their configured order, without sorting or deduplication. Duplicate ratios can create overlapping drawings.
 
-Prices are interpolated logarithmically. Ratio 0.5 is the geometric midpoint. Classic 0.618 and 0.786 lines alone are not the dedicated OTE band; the separate Swing Zones layer provides that band in v1.1 development. Very large ratio values can produce extreme coordinates; no additional ratio validation is implemented.
+Prices are interpolated logarithmically. Ratio 0.5 is the geometric midpoint. Classic 0.618 and 0.786 lines alone are not the dedicated OTE band; the separate Swing Zones layer provides that band in v1.1.0. Very large ratio values can produce extreme coordinates; no additional ratio validation is implemented.
 
 ## Fair value gaps — 3 inputs
 
@@ -71,7 +71,7 @@ Prices are interpolated logarithmically. Ratio 0.5 is the geometric midpoint. Cl
 
 Color transparency uses the Pine scale: 0 is opaque and 100 is invisible. No gap-age, minimum-size, mitigation-mode or storage-limit inputs are provided.
 
-## Swing Zones — 8 inputs (v1.1 development)
+## Swing Zones — 8 inputs (v1.1.0)
 
 | Setting | Default | Effect |
 | --- | --- | --- |
