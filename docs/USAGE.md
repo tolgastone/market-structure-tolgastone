@@ -7,7 +7,7 @@ MST displays structural swings, boundary breaks, Cement markers, logarithmic Fib
 1. Open a standard candlestick chart in TradingView.
 2. Copy the complete contents of [`ms_tolgastone.pine`](../ms_tolgastone.pine) into a new Pine Editor indicator script.
 3. Save the script and add it to the chart. No separate library is required.
-4. Start with **Break source = Close** and **Cement lookback bars = 1**, the current defaults.
+4. Start with **Break source = Close**, **Break tolerance = None** and **Cement lookback bars = 1**, the current defaults.
 5. Leave **Color mode = Auto** to follow the chart background, or select **Custom** to use the color controls. The default view shows swings, extreme markers, breaks, boundaries and Swing Zones. EQ and OTE provide the dedicated 0.5 and 0.618–0.786 annotations; matching classic Fibonacci labels are omitted while these layers are enabled. Cement markers and FVG fragments start hidden. Open the indicator settings to choose additional layers. See the [parameter reference](PARAMETERS.md) for every control.
 
 The same Auto palette adapts to light and dark chart backgrounds; there are no separate Light/Dark presets.
@@ -25,11 +25,18 @@ The main sequence is **reference boundary break → impulse extreme tracking →
 | BOS dashed line and label | Normal-path break in the reference swing's direction |
 | CHoCH dashed line and label | Normal-path break against the reference swing's direction |
 | Bullish / bearish triangles | Bullish / bearish Cement markers emitted by the structural engine; these do not mark every candle satisfying the Cement predicate |
+| T above / below a bar (optional, v1.2.0) | A tested upward / downward source crossing filtered by the selected tolerance; not a sweep classification |
 | Two right-pointing boundary arrows | Working swing high and low, not necessarily the reference thresholds used to detect breaks |
 
 Auto uses theme-aware teal/coral directional colors for BOS/CHoCH lines and text, extreme circles and Cement markers. In Custom mode, Bullish color and Bearish color control these elements, while Structure line color affects swing lines. Structure line width affects swing lines; dashed break lines retain their fixed width.
 
 For a less crowded view, keep swings, break labels and boundary arrows visible and turn off **Show Fibonacci levels** and **Show FVG fragments**. This is an optional viewing arrangement, not a change to the shipped defaults. Historical swing lines have no master visibility switch.
+
+## Adjust break sensitivity (v1.2.0)
+
+Keep **Break tolerance = None** for the preceding behavior. Percent requires a boundary-relative price excess; ATR requires an excess based on the previous closed bar's ATR. The same filter applies to normal breaks and opposite-boundary interruptions. Nonzero settings can change the entire swing chain; Cement completion remains active.
+
+Enable **Filtered break markers (T)** to see tested sub-threshold crossings. T follows the selected Close or High/Low source, can repeat on later bars, and can change before close. Working arrows do not show tolerance thresholds. See [Break tolerance](BREAK_TOLERANCE.md) for examples and ATR warm-up behavior.
 
 ## Understand Cement
 

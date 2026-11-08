@@ -24,7 +24,9 @@ The high and low form structural boundaries. The script draws extreme points as 
 | Close (default) | Current close > reference high | Current close < reference low |
 | High/Low | Current high > reference high | Current low < reference low |
 
-An equal touch is not a break. Close selects a price source; it does not defer execution until bar close.
+The table describes the default Break tolerance = None. Optional Percent and ATR modes require an additional distance beyond the reference high/low for both normal breaks and opposite-boundary interruptions. See [Break tolerance](BREAK_TOLERANCE.md) for exact formulas, previous-bar ATR sampling and marker semantics. This v1.2.0 option changes structural acceptance; Cement predicates are unchanged.
+
+An equal touch is not a break, including equality at a filtered threshold. Close selects a price source; it does not defer execution until bar close.
 
 For the normal break path, classification compares break direction with reference direction:
 
@@ -63,7 +65,7 @@ The downward case mirrors this: break a reference low, track lower extremes, and
 
 **Initial direction.** The first loaded bar seeds both extremes. Before a mature reference exists, the first Cement establishes initial direction and seeds a provisional opposite reference. This bootstrap is different from the established boundary-break cycle. The history loaded into the chart therefore matters.
 
-**Opposite-boundary interruption.** While tracking an impulse, a break through the opposite reference boundary takes priority over the normal extreme-update/Cement path. The engine draws and copies the interrupted working swing, creates the reverse working swing, and evaluates break drawing against the newly copied reference. It can finalize an impulse without opposite Cement.
+**Opposite-boundary interruption.** While tracking an impulse, a break through the opposite reference boundary takes priority over the normal extreme-update/Cement path. The engine draws and copies the interrupted working swing and creates the reverse working swing. None and zero-distance modes retain break drawing against the newly copied reference; a nonzero tolerance mode retains the interruption direction accepted before that copy, because the copied reference can have a different threshold. It can finalize an impulse without opposite Cement.
 
 **Same-bar sequencing.** The three state blocks execute as sequential independent checks. A state change can enter the next block on the same bar. In High/Low mode, an outside bar can satisfy both normal break tests; the downward test follows the upward test in source order. These details are part of the current implementation.
 

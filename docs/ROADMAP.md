@@ -1,6 +1,6 @@
 # Roadmap and research ideas
 
-MST v1.1.0 is the current release; the structural engine remains the v1.0.0 baseline. This document is the working backlog for future releases and separate experiments. It records direction, not a promise of delivery dates or a claim that the listed features already exist. Priorities and proposed versions can change as the design and evidence develop.
+MST v1.2.0 is the current release. It adds opt-in structural break tolerance; None retains the published baseline. This document is the working backlog for future releases and separate experiments. It records direction, not a promise of delivery dates or a claim that the listed features already exist. Priorities and proposed versions can change as the design and evidence develop.
 
 ## Development principles
 
@@ -10,14 +10,15 @@ MST v1.1.0 is the current release; the structural engine remains the v1.0.0 base
 - Treat altered break thresholds, Cement completion rules and confirmation policies as behavior changes requiring explicit design and comparison.
 - Validate experiments in a separate Lab before considering an optional product mode. Listing an experiment here does not authorize implementation or merging it into the published engine.
 
-**Delivered:** v1.1.0 Swing Zones. See the [Swing Zones guide](SWING_ZONES.md). The next proposed feature milestone is v1.2 Liquidity.
+**Delivered:** v1.1.0 Swing Zones. See the [Swing Zones guide](SWING_ZONES.md). v1.2.0 adds optional Break Tolerance; BSL/SSL and sweep observations remain separate backlog items.
 
 ## Proposed release sequence
 
 | Target | Focus | Proposed scope |
 | --- | --- | --- |
 | v1.1 — Swing Zones (delivered) | Shared Fibonacci visualization | OTE + Premium/Discount + Equilibrium |
-| v1.2 — Liquidity | Observable behavior around structural boundaries | BSL/SSL reference levels + same-bar wick/reclaim sweep markers |
+| v1.2 — Break Tolerance (delivered) | User-selected structural acceptance | None / Percent / ATR and optional filtered-crossing markers; retain the baseline default |
+| Liquidity — version to be assigned | Observable behavior around structural boundaries | BSL/SSL reference levels + same-bar wick/reclaim sweep markers |
 | v1.3 — Alerts & Display | Event availability and display control | Structural alerts, FVG display improvements, drawing controls and input refinements |
 | v2.0 candidates — Advanced Structure | Separate architectural assessment | EQH/EQL, MSS, Internal Structure and Order Blocks; scope and version not committed |
 
@@ -61,16 +62,16 @@ These feature names are working labels. They do not establish a single universal
 
 ## Research pool — separate from the published engine
 
-No experiments in this section are scheduled for implementation. Keep them in a separate Lab and document assumptions and observations before considering a product option.
+Percent minimum penetration and ATR thresholds have been selected for an opt-in v1.2.0 product option; see [Break tolerance](BREAK_TOLERANCE.md). Other experiments below remain separate research and are not scheduled for implementation.
 
 ### Gate A — structural break acceptance
 
-The current baseline accepts a strict boundary crossing using Close or High/Low. A small excess is still a break. Research can explore whether a different acceptance rule is useful without changing that default silently.
+The baseline (None) accepts a strict boundary crossing using Close or High/Low. A small excess is still a break. The working source adds selectable Percent and ATR distances without changing that default; other acceptance alternatives remain research.
 
 | Experiment | Candidate rule | Decisions needed |
 | --- | --- | --- |
-| Minimum penetration | Require an excess beyond HH/LL by a minimum price/percentage distance | Measurement, tick rounding, strictness and treatment of sub-threshold excursions |
-| ATR threshold | Require penetration relative to volatility | ATR period, multiplier and when the threshold is sampled/frozen |
+| Minimum penetration | Percent distance implemented in v1.2.0 | Strict boundary-relative distance, no tick rounding; tested sub-threshold crossings can be marked T |
+| ATR threshold | ATR distance implemented in v1.2.0 | Previous closed-bar ATR, refreshed each bar; no per-swing freeze |
 | Swing-range threshold | Require an excess proportional to the reference swing range, e.g. an illustrative 33% | Exact range definition, logarithmic geometry where appropriate, anchoring and parameter bounds; 33% is not an endorsed default |
 | Volume confirmation | Evaluate a break against relative volume | Data availability, baseline window and the behavior when volume is missing or unreliable |
 | Break & Retest | Treat the initial break as a candidate and wait for acceptance/retest | Retest bounds, timeout, invalidation and event availability |

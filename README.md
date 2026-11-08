@@ -18,7 +18,9 @@ Fibonacci levels use logarithmic prices: 0.5 is a geometric midpoint. FVG tracki
 
 Read [The MST approach](docs/ALGORITHM.md) for the structural cycle, an example, and the implementation details behind the drawings.
 
-**Current release:** [v1.1.0 — Swing Zones](https://github.com/tolgastone/market-structure-tolgastone/releases/tag/v1.1.0).
+**Current release:** [v1.2.0 — Break Tolerance](https://github.com/tolgastone/market-structure-tolgastone/releases/tag/v1.2.0).
+
+v1.2.0 adds optional Percent/ATR break tolerance and filtered-crossing T markers. None is the default and preserves the preceding structural behavior. These controls change break acceptance when enabled; see [Break tolerance](docs/BREAK_TOLERANCE.md) and the [v1.2.0 release notes](docs/releases/v1.2.0.md).
 
 ## Logarithmic price geometry
 
@@ -36,7 +38,8 @@ Boundary breaks, Cement predicates, and FVG creation/trimming still compare actu
 
 - [Illustrated concepts](docs/CONCEPTS.md): Cement candles, BOS, CHoCH and FVG.
 - [Usage guide](docs/USAGE.md): setup, chart reading, timing and common questions.
-- [Parameter reference](docs/PARAMETERS.md): all 41 controls, defaults and effects.
+- [Parameter reference](docs/PARAMETERS.md): all controls, defaults and effects.
+- [Break tolerance](docs/BREAK_TOLERANCE.md): optional Percent/ATR structural acceptance and T markers.
 - [The MST approach](docs/ALGORITHM.md): structural logic and implementation details.
 - [Chart examples](examples/README.md): light/dark defaults and optional layers.
 - [Roadmap and research ideas](docs/ROADMAP.md): proposed releases, priorities and separate experiments.

@@ -54,6 +54,28 @@ i_cementLength       = input.int(
     display = display.data_window
 )
 
+// Optional penetration filter. None retains the original strict-crossing behavior.
+i_breakTolerance = input.string(
+    "None", "Break tolerance", ["None", "Percent", "ATR"], group = group_STRUCTURAL,
+    tooltip = "Require extra distance beyond the reference high/low for both normal breaks and opposite-boundary interruptions. None preserves the original rules. Cement is unchanged.",
+    display = display.data_window
+)
+i_breakPercent = input.float(
+    0.5, "Break tolerance (%)", minval = 0.0, maxval = 99.0, step = 0.1, group = group_STRUCTURAL,
+    tooltip = "Percent mode only. Distance = absolute reference boundary price x percentage / 100. A value of 0 disables the filter. Equality at the threshold is not a break.",
+    display = display.data_window
+)
+i_breakAtrLength = input.int(
+    14, "Break ATR length", minval = 1, maxval = 500, group = group_STRUCTURAL,
+    tooltip = "ATR mode only. Uses the previous closed bar's Wilder ATR on the chart timeframe. The distance is recalculated each bar, not frozen per swing.",
+    display = display.data_window
+)
+i_breakAtrMultiplier = input.float(
+    0.1, "Break ATR multiplier", minval = 0.0, maxval = 100.0, step = 0.05, group = group_STRUCTURAL,
+    tooltip = "ATR mode only. Distance = previous closed-bar ATR x multiplier. No filtered break is accepted until ATR is available. A value of 0 disables the filter.",
+    display = display.data_window
+)
+
 // Optional Fibonacci ratios; levels 0 and 1 are included by the display code.
 i_showFiboL2            = input.bool(false, "Enable 1", group = group_FIBO, inline = "L2")
 i_fiboL2                = input.float(
@@ -105,6 +127,10 @@ i_fiboL9                = input.float(
 )
 
 // Display switches and colors.
+i_showFilteredBreaks = input.bool(
+    false, "Filtered break markers (T)", group = group_VISUAL,
+    tooltip = "T marks a tested boundary crossing that did not exceed the tolerance threshold. Uses the selected break source, not wick-only sweep detection. Open-bar marks can change; repeated bars may each be marked."
+)
 i_showCements           = input.bool(
     false, "Cement markers", group = group_VISUAL,
     tooltip = "Show opposite-Cement completion markers. Hiding markers does not disable Cement calculations."
@@ -222,17 +248,41 @@ type Fvg
 // =============================================================================
 // STRUCTURAL BOUNDARIES
 // =============================================================================
-// Equality is a touch, not a break. Close mode also evaluates on the open bar.
+// Calculate ATR on every bar; the breaking candle cannot enlarge its own buffer.
+breakATR = ta.atr(i_breakAtrLength)[1]
+toleranceActive = (i_breakTolerance == "Percent" and i_breakPercent > 0) or (i_breakTolerance == "ATR" and i_breakAtrMultiplier > 0)
+
+get_break_buffer(float boundary) =>
+    float distance = 0.0
+    if toleranceActive
+        distance := i_breakTolerance == "Percent" ? math.abs(boundary) * i_breakPercent / 100.0 : breakATR * i_breakAtrMultiplier
+    distance
+
+// Equality is a touch, not a break, including equality at a filtered threshold.
+// Close selects the current price source; it does not wait for bar close.
 is_break_up(Swing s, string source) =>
     result = false
     if not na(s)
-        result := (source == "Close" ? close : high) > s.swingHigh.myHigh
+        float buffer = get_break_buffer(s.swingHigh.myHigh)
+        result := not na(buffer) and (source == "Close" ? close : high) > s.swingHigh.myHigh + buffer
     result
 
 is_break_down(Swing s, string source) =>
     result = false
     if not na(s)
-        result := (source == "Close" ? close : low) < s.swingLow.myLow
+        float buffer = get_break_buffer(s.swingLow.myLow)
+        result := not na(buffer) and (source == "Close" ? close : low) < s.swingLow.myLow - buffer
+    result
+
+// Observe only checks the engine actually makes. No candidate or sweep state is created.
+is_filtered_break(Swing s, string source, bool upward) =>
+    bool result = false
+    if toleranceActive and not na(s)
+        float boundary = upward ? s.swingHigh.myHigh : s.swingLow.myLow
+        float buffer = get_break_buffer(boundary)
+        float price = source == "Close" ? close : (upward ? high : low)
+        if not na(buffer)
+            result := upward ? (price > boundary and price <= boundary + buffer) : (price < boundary and price >= boundary - buffer)
     result
 
 // =============================================================================
@@ -612,6 +662,13 @@ if barstate.isfirst
     currentSwing  := Swing.new(na, pt, pt)
     currentState  := State.LOOK_FOR_DIRECTION
 
+// Per-execution observations follow Pine rollback on realtime updates.
+bool filteredUp = false
+bool filteredDown = false
+bool acceptedUp = false
+bool acceptedDown = false
+bool interruptionUp = false
+
 // Evaluate Cement predicates on each execution.
 isBullishCem = is_bullish_cemented_candle(i_cementLength)
 isBearishCem = is_bearish_cemented_candle(i_cementLength)
@@ -677,7 +734,10 @@ if currentState == State.LOOK_FOR_DIRECTION
 // Opposite boundary breaks take priority over extreme updates and Cement completion.
 if currentState == State.LOOK_FOR_SWING
     if currentSwing.direction == Direction.UP
+        filteredDown := is_filtered_break(lastSwing, i_breakSource, false)
         if is_break_down(lastSwing, i_breakSource)
+            acceptedDown := true
+            interruptionUp := false
             isComingFromSwing := true
             currentState      := State.LOOK_FOR_BREAK
         else
@@ -692,7 +752,10 @@ if currentState == State.LOOK_FOR_SWING
                 currentState := State.LOOK_FOR_BREAK
 
     if currentSwing.direction == Direction.DOWN
+        filteredUp := is_filtered_break(lastSwing, i_breakSource, true)
         if is_break_up(lastSwing, i_breakSource)
+            acceptedUp := true
+            interruptionUp := true
             isComingFromSwing := true
             currentState      := State.LOOK_FOR_BREAK
         else
@@ -721,10 +784,15 @@ if currentState == State.LOOK_FOR_BREAK
         if lastSwing.direction == Direction.UP
             currentSwing := Swing.new(Direction.DOWN, lastSwing.swingHigh, get_point_current())
         if i_showBreaks
-            draw_breakout(lastSwing, is_break_up(lastSwing, i_breakSource), structureColor)
+            // A copied reference can have a different buffer. Retain the accepted
+            // interruption direction in filtered modes; preserve legacy drawing in None.
+            draw_breakout(lastSwing, toleranceActive ? interruptionUp : is_break_up(lastSwing, i_breakSource), structureColor)
         currentState := State.LOOK_FOR_SWING
     else
+        filteredUp := filteredUp or is_filtered_break(lastSwing, i_breakSource, true)
+        filteredDown := filteredDown or is_filtered_break(lastSwing, i_breakSource, false)
         if is_break_up(lastSwing, i_breakSource)
+            acceptedUp := true
             if lastSwing.direction == Direction.UP
                 draw_swing(
                     Swing.new(Direction.DOWN, lastSwing.swingHigh, lastLowPoint),
@@ -743,6 +811,7 @@ if currentState == State.LOOK_FOR_BREAK
             currentState := State.LOOK_FOR_SWING
 
         if is_break_down(lastSwing, i_breakSource)
+            acceptedDown := true
             if lastSwing.direction == Direction.DOWN
                 draw_swing(
                     Swing.new(Direction.UP, lastHighPoint, lastSwing.swingLow),
@@ -764,6 +833,19 @@ if currentState == State.LOOK_FOR_BREAK
         lastLowPoint := get_point_current()
     if high > lastHighPoint.myHigh
         lastHighPoint := get_point_current()
+
+// T denotes a sub-threshold tested crossing, not a liquidity classification.
+// Suppress a direction if an accepted break also occurred on this execution.
+plotchar(
+    i_showFilteredBreaks and filteredUp and not acceptedUp,
+    title = "Filtered upward break", char = "T", location = location.abovebar,
+    color = equilibriumColor, size = size.tiny, display = display.pane
+)
+plotchar(
+    i_showFilteredBreaks and filteredDown and not acceptedDown,
+    title = "Filtered downward break", char = "T", location = location.belowbar,
+    color = equilibriumColor, size = size.tiny, display = display.pane
+)
 
 // =============================================================================
 // FVG MAINTENANCE

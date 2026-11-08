@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 1.2.0 — 2026-11-08
+
+### Added
+
+- Optional None / Percent / ATR structural break tolerance for normal breaks and opposite-boundary interruptions. None and zero-distance settings retain the preceding behavior.
+- Previous closed-bar ATR sampling with configurable period/multiplier; distances refresh each bar.
+- Optional T markers for tested crossings rejected by tolerance, independently of structural drawings. No liquidity-sweep classification is applied.
+- Break-tolerance guide and updated parameter, usage and algorithm documentation. Cement rules, FVG lifecycle and logarithmic zone geometry are unchanged.
+
 ## 1.1.0 — 2026-11-08
 
 ### Added

@@ -1,6 +1,6 @@
 # Parameter reference
 
-These names and defaults match the current [`ms_tolgastone.pine`](../ms_tolgastone.pine). The indicator exposes **41 inputs in six groups** in v1.1.0, including eight Swing Zones controls. The classic view emphasizes structure: Cement markers and FVG fragments are hidden; only optional Fibonacci ratios 0.5, 0.618 and 0.786 are enabled.
+These names and defaults match the current [`ms_tolgastone.pine`](../ms_tolgastone.pine). The indicator exposes **46 inputs in six groups** in the working source, including five v1.2.0 break-tolerance controls (the published v1.1.0 has 41 inputs). The classic view emphasizes structure: Cement markers and FVG fragments are hidden; only optional Fibonacci ratios 0.5, 0.618 and 0.786 are enabled.
 
 ## Appearance — 3 inputs
 
@@ -12,19 +12,25 @@ These names and defaults match the current [`ms_tolgastone.pine`](../ms_tolgasto
 
 Auto uses darker tones on light backgrounds and lighter tones on dark backgrounds. Structure is blue; Fibonacci is muted slate; boundary arrows are faded. Automatic FVG fills have transparency 90 on light backgrounds and 87 on dark backgrounds. Color controls are retained but do not override the palette until Color mode is Custom.
 
-## Structure — 2 inputs
+## Structure — 6 inputs
 
 | Setting | Default | Accepted values | Effect |
 | --- | --- | --- | --- |
 | Break source | Close | Close, High/Low | Uses current close or candle extremes for strict reference-boundary breaks. Equal touches do not break. Close does not imply evaluation only at bar close. |
 | Cement lookback bars | 1 | Integer 1–10; step 1 | Bullish close must exceed every high of the preceding N bars; bearish close must fall below every low. Not a consecutive-Cement count. |
 
-These two controls affect structural calculations. Changing them can change swing anchors, event classification and event timing.
+| Break tolerance | None | None, Percent, ATR | Optional extra distance for normal breaks and opposite-boundary interruptions. None preserves the preceding engine. |
+| Break tolerance (%) | 0.5 | 0–99; step 0.1 | Percent mode only: absolute reference boundary × percentage / 100. Zero disables filtering. |
+| Break ATR length | 14 | Integer 1–500 | ATR mode only: previous closed-bar Wilder ATR, recalculated each bar. |
+| Break ATR multiplier | 0.1 | 0–100; step 0.05 | ATR mode only: ATR × multiplier. Positive values wait for ATR availability; zero disables filtering. |
 
-## Structure display — 7 inputs
+Break source, Cement lookback and nonzero tolerance can change swing anchors, event classification and timing. Tolerance equality does not pass; no tick rounding is applied. ATR is not frozen per swing. These inactive percentage/ATR defaults are starting values, not calibrated recommendations. See [Break tolerance](BREAK_TOLERANCE.md).
+
+## Structure display — 8 inputs
 
 | Setting | Default | Effect |
 | --- | --- | --- |
+| Filtered break markers (T) | Off | Marks tested sub-threshold source crossings above/below the bar. Not sweep detection. Repeated bars can be marked; open-bar marks can change. Does not affect the engine. |
 | Cement markers | Off | Shows the Cement markers emitted by the structural engine. Does not mark every qualifying Cement candle or disable calculations when off. |
 | BOS / CHoCH labels | On | Shows both dashed break lines and their labels. Does not disable structural break processing. |
 | Swing extreme markers | On | Shows high and low circles for drawn swing endpoints, using the bullish and bearish palette colors. |
