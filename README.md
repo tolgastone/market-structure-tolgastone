@@ -37,6 +37,7 @@ Boundary breaks, Cement predicates, and FVG creation/trimming still compare actu
 - [Parameter reference](docs/PARAMETERS.md): all 33 controls, defaults and effects.
 - [The MST approach](docs/ALGORITHM.md): structural logic and implementation details.
 - [Chart examples](examples/README.md): light/dark defaults and optional layers.
+- [Roadmap and research ideas](docs/ROADMAP.md): proposed releases, priorities and separate experiments.
 - [Changelog](CHANGELOG.md): release notes.
 - [Contributing](CONTRIBUTING.md): reporting issues and proposing changes.
 - [TradingView description](docs/TRADINGVIEW_DESCRIPTION.md): publication text.
