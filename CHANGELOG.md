@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 1.2.2 — 2026-11-08
+
+### Changed
+
+- Reuse FVG display boxes across latest-bar updates; update coordinates/colors, create missing boxes and delete surplus slots. Same-direction union, stored-fragment lifecycle and logarithmic visibility range are unchanged.
+
+- Reuse classic Fibonacci line/label pairs, update their coordinates/text/colors, and delete surplus pairs when the visible level count falls. Recreate handles removed by platform garbage collection. Logarithmic levels, label formatting and zone-based level suppression are unchanged.
+
+- Reuse the two working-swing boundary arrows instead of deleting and recreating them on each latest-bar update. Recreate a handle if platform garbage collection removed it; coordinates, color and arrow style are unchanged.
+
 ## 1.2.1 — 2026-11-08
 
 ### Changed

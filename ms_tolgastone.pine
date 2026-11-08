@@ -351,18 +351,20 @@ update_zone_label(label existing, int labelBar, float price, string labelText, c
 // =============================================================================
 // DRAWING HELPERS
 // =============================================================================
-// Draw one union interval. All FVG boxes share the same horizontal extent.
-draw_fvg_region(float bottomPrice, float topPrice, box[] fvgBoxes, color fillColor) =>
-    fvgBoxes.push(
-        box.new(
-            bar_index, top = topPrice, right = bar_index + 30, bottom = bottomPrice,
-            bgcolor = fillColor, border_width = 0
-        )
-    )
+// Reuse a display slot for one union interval; recreate handles removed by GC.
+draw_fvg_region(float bottomPrice, float topPrice, box[] fvgBoxes, color fillColor, int slot) =>
+    box existing = slot < array.size(fvgBoxes) ? fvgBoxes.get(slot) : na
+    box region = update_zone_box(existing, bar_index, bar_index + 30, topPrice, bottomPrice, fillColor)
+    if slot < array.size(fvgBoxes)
+        fvgBoxes.set(slot, region)
+    else
+        fvgBoxes.push(region)
+    slot + 1
 
 // Filter original fragments first, then union visible intervals per direction.
 // Sort temporary price arrays; never mutate stored FVGs or bridge a positive gap.
-draw_fvg_side(Fvg[] fvgArr, box[] fvgBoxes, float rangeHigh, float rangeLow, bool bearish, color fillColor) =>
+draw_fvg_side(Fvg[] fvgArr, box[] fvgBoxes, float rangeHigh, float rangeLow, bool bearish, color fillColor, int startSlot) =>
+    int nextSlot = startSlot
     float[] lowPrices = array.new<float>()
     float[] highPrices = array.new<float>()
     for fvg in fvgArr
@@ -382,111 +384,92 @@ draw_fvg_side(Fvg[] fvgArr, box[] fvgBoxes, float rangeHigh, float rangeLow, boo
         else if nextLow <= mergedHigh
             mergedHigh := math.max(mergedHigh, nextHigh)
         else
-            draw_fvg_region(mergedLow, mergedHigh, fvgBoxes, fillColor)
+            nextSlot := draw_fvg_region(mergedLow, mergedHigh, fvgBoxes, fillColor, nextSlot)
             mergedLow := nextLow
             mergedHigh := nextHigh
     if not na(mergedLow)
-        draw_fvg_region(mergedLow, mergedHigh, fvgBoxes, fillColor)
+        nextSlot := draw_fvg_region(mergedLow, mergedHigh, fvgBoxes, fillColor, nextSlot)
+
+    nextSlot
 
 // Display-only union: bullish and bearish regions retain their own colors.
 draw_fvgs(Fvg[] fvgArr, box[] fvgBoxes, float fvgRangeHigh, float fvgRangeLow, color fvgUpColor, color fvgDownColor) =>
-    for fvgBox in fvgBoxes
-        fvgBox.delete()
-    fvgBoxes.clear()
+    int usedSlots = draw_fvg_side(fvgArr, fvgBoxes, fvgRangeHigh, fvgRangeLow, false, fvgUpColor, 0)
+    usedSlots := draw_fvg_side(fvgArr, fvgBoxes, fvgRangeHigh, fvgRangeLow, true, fvgDownColor, usedSlots)
+    while array.size(fvgBoxes) > usedSlots
+        box.delete(fvgBoxes.pop())
 
-    draw_fvg_side(fvgArr, fvgBoxes, fvgRangeHigh, fvgRangeLow, false, fvgUpColor)
-    draw_fvg_side(fvgArr, fvgBoxes, fvgRangeHigh, fvgRangeLow, true, fvgDownColor)
-
-// Fibonacci levels use logarithmic prices, not linear interpolation.
+// Keep one line/label pair per visible ratio; preserve logarithmic calculations.
 draw_swing_fibo(Swing s, line[] fiboLines, label[] fiboLabels, float[] fiboLevels, color fiboColor, color fiboTextColor) =>
-    for i = 0 to (array.size(fiboLines) == 0 ? na : array.size(fiboLines) - 1)
-        fiboLines.get(i).delete()
-    for i = 0 to (array.size(fiboLabels) == 0 ? na : array.size(fiboLabels) - 1)
-        fiboLabels.get(i).delete()
-    fiboLines.clear()
-    fiboLabels.clear()
+    int levelCount = array.size(fiboLevels)
+    while array.size(fiboLines) > levelCount
+        line.delete(fiboLines.pop())
+    while array.size(fiboLabels) > levelCount
+        label.delete(fiboLabels.pop())
 
-    if s.direction == Direction.UP
-        for i = 0 to array.size(fiboLevels) - 1
-            fiboVal = math.exp(
+    for i = 0 to (levelCount == 0 ? na : levelCount - 1)
+        float fiboVal = na
+        int anchorBar = s.direction == Direction.UP ? s.swingHigh.myIndex : s.swingLow.myIndex
+        if s.direction == Direction.UP
+            fiboVal := math.exp(
                 math.log(s.swingHigh.myHigh) - (math.log(s.swingHigh.myHigh) - math.log(s.swingLow.myLow)) * fiboLevels.get(i)
             )
-            fiboLabels.push(
-                label.new(
-                    bar_index + 9,
-                    fiboVal,
-                    str.tostring(fiboLevels.get(i), '0.000') + " (" + str.tostring(fiboVal, format.mintick) + ")",
-                    color     = color.new(color.white, 100),
-                    style     = label.style_label_left,
-                    textcolor = fiboTextColor,
-                    size      = size.small
-                )
-            )
-            fiboLines.push(
-                line.new(
-                    s.swingHigh.myIndex,
-                    fiboVal,
-                    bar_index + 10,
-                    fiboVal,
-                    width = 1,
-                    style = line.style_dotted,
-                    color = fiboColor
-                )
-            )
-    else
-        for i = 0 to array.size(fiboLevels) - 1
-            fiboVal = math.exp(
+        else
+            fiboVal := math.exp(
                 math.log(s.swingLow.myLow) - (math.log(s.swingLow.myLow) - math.log(s.swingHigh.myHigh)) * fiboLevels.get(i)
             )
-            fiboLabels.push(
-                label.new(
-                    bar_index + 9,
-                    fiboVal,
-                    str.tostring(fiboLevels.get(i), '0.000') + " (" + str.tostring(fiboVal, format.mintick) + ")",
-                    color     = color.new(color.white, 100),
-                    style     = label.style_label_left,
-                    textcolor = fiboTextColor,
-                    size      = size.small
-                )
-            )
-            fiboLines.push(
-                line.new(
-                    s.swingLow.myIndex,
-                    fiboVal,
-                    bar_index + 10,
-                    fiboVal,
-                    width = 1,
-                    style = line.style_dotted,
-                    color = fiboColor
-                )
-            )
+        string labelText = str.tostring(fiboLevels.get(i), '0.000') + " (" + str.tostring(fiboVal, format.mintick) + ")"
 
+        label fiboLabel = i < array.size(fiboLabels) ? fiboLabels.get(i) : na
+        if na(fiboLabel) or not array.includes(label.all, fiboLabel)
+            fiboLabel := label.new(
+                bar_index + 9, fiboVal, labelText,
+                color = color.new(color.white, 100), style = label.style_label_left,
+                textcolor = fiboTextColor, size = size.small
+            )
+            if i < array.size(fiboLabels)
+                fiboLabels.set(i, fiboLabel)
+            else
+                fiboLabels.push(fiboLabel)
+        else
+            label.set_xy(fiboLabel, bar_index + 9, fiboVal)
+            label.set_text(fiboLabel, labelText)
+            label.set_textcolor(fiboLabel, fiboTextColor)
+
+        line fiboLine = i < array.size(fiboLines) ? fiboLines.get(i) : na
+        if na(fiboLine) or not array.includes(line.all, fiboLine)
+            fiboLine := line.new(
+                anchorBar, fiboVal, bar_index + 10, fiboVal,
+                width = 1, style = line.style_dotted, color = fiboColor
+            )
+            if i < array.size(fiboLines)
+                fiboLines.set(i, fiboLine)
+            else
+                fiboLines.push(fiboLine)
+        else
+            line.set_xy1(fiboLine, anchorBar, fiboVal)
+            line.set_xy2(fiboLine, bar_index + 10, fiboVal)
+            line.set_color(fiboLine, fiboColor)
+
+// Keep two boundary handles; recreate only if platform GC removed a line.
 draw_swing_limit_lines(Swing s, line[] lines, color lineColor) =>
-    for i = 0 to (array.size(lines) == 0 ? na : array.size(lines) - 1)
-        lines.get(i).delete()
-    lines.clear()
-    lines.push(
-        line.new(
-            s.swingHigh.myIndex,
-            s.swingHigh.myHigh,
-            bar_index + 10,
-            s.swingHigh.myHigh,
-            width = 1,
-            style = line.style_arrow_right,
-            color = lineColor
-        )
-    )
-    lines.push(
-        line.new(
-            s.swingLow.myIndex,
-            s.swingLow.myLow,
-            bar_index + 10,
-            s.swingLow.myLow,
-            width = 1,
-            style = line.style_arrow_right,
-            color = lineColor
-        )
-    )
+    for i = 0 to 1
+        Point endpoint = i == 0 ? s.swingHigh : s.swingLow
+        float price = i == 0 ? endpoint.myHigh : endpoint.myLow
+        line boundary = i < array.size(lines) ? lines.get(i) : na
+        if na(boundary) or not array.includes(line.all, boundary)
+            boundary := line.new(
+                endpoint.myIndex, price, bar_index + 10, price,
+                width = 1, style = line.style_arrow_right, color = lineColor
+            )
+            if i < array.size(lines)
+                lines.set(i, boundary)
+            else
+                lines.push(boundary)
+        else
+            line.set_xy1(boundary, endpoint.myIndex, price)
+            line.set_xy2(boundary, bar_index + 10, price)
+            line.set_color(boundary, lineColor)
 
 draw_cement_point(CementCandle candle) =>
     label.new(

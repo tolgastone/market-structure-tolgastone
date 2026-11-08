@@ -39,6 +39,8 @@ Break source, Cement lookback and nonzero tolerance can change swing anchors, ev
 | Boundary color | Blue `#4773A8`; transparency 40 | In Custom mode, independently colors working swing boundary arrows. |
 | Structure line width | 1 | Integer 1–5; step 1. Changes swing-line width. Dashed break lines and boundary arrows retain their fixed width. |
 
+As of v1.2.2, working boundary arrows and classic Fibonacci line/label pairs are reused across updates. FVG display boxes are also reused; surplus drawings are removed when the required count falls, and handles removed by platform garbage collection are recreated. These changes add no settings or calculation filters.
+
 There is no master input for hiding historical swing lines. Boundary color is independent of Fibonacci color. Swing width defaults to 1; break lines and boundary arrows also remain thin.
 
 ## Fibonacci — 18 inputs

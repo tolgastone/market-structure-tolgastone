@@ -18,7 +18,9 @@ Fibonacci levels use logarithmic prices: 0.5 is a geometric midpoint. FVG tracki
 
 Read [The MST approach](docs/ALGORITHM.md) for the structural cycle, an example, and the implementation details behind the drawings.
 
-**Current release:** [v1.2.1 — FVG Display Fix](https://github.com/tolgastone/market-structure-tolgastone/releases/tag/v1.2.1).
+**Current release:** [v1.2.2 — Drawing Reuse](https://github.com/tolgastone/market-structure-tolgastone/releases/tag/v1.2.2).
+
+v1.2.2 reuses working-swing boundary arrows, classic Fibonacci lines/labels and FVG display boxes across updates. Calculations and display-range rules are unchanged. See the [release notes](docs/releases/v1.2.2.md).
 
 v1.2.1 draws overlapping or touching same-direction FVG fragments once, avoiding stacked opacity. Stored gaps, mitigation and the logarithmic display range are unchanged. See the [release notes](docs/releases/v1.2.1.md).
 
