@@ -1,0 +1,718 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © tolgastone
+//@version=6
+//
+// Tracks structural boundary breaks, impulse extremes, and opposite-Cement completion.
+// Initial direction uses Cement; an opposite boundary break can interrupt an impulse.
+// Open-bar results are provisional. Completed swings can be drawn at earlier extremes.
+// Shared for educational and informational use; not financial or investment advice.
+// Trading involves risk. No accuracy, profitability or future result is guaranteed.
+
+indicator(
+    "Market Structure by tolgastone",
+    "MST",
+    overlay          = true,
+    max_labels_count = 500,
+    max_lines_count  = 500,
+    max_boxes_count  = 500
+)
+
+// =============================================================================
+// INPUTS
+// =============================================================================
+// Input group labels.
+var group_APPEARANCE = "Appearance"
+var group_STRUCTURAL = "Structure"
+var group_VISUAL     = "Structure display"
+var group_FIBO       = "Fibonacci"
+var group_FVG        = "Fair value gaps"
+
+// Auto follows the chart background; Custom uses the color controls below.
+i_colorMode = input.string(
+    "Auto", "Color mode", ["Auto", "Custom"], group = group_APPEARANCE,
+    tooltip = "Auto adapts colors to the chart background. Custom uses your selected colors. Visibility switches apply in both modes.",
+    display = display.data_window
+)
+i_bullColor = input.color(#087F7A, "Bullish color", group = group_APPEARANCE)
+i_bearColor = input.color(#BA4C52, "Bearish color", group = group_APPEARANCE)
+
+// Structural rules.
+i_breakSource        = input.string(
+    "Close", "Break source", ["Close", "High/Low"], group = group_STRUCTURAL,
+    tooltip = "Close uses the current close; High/Low uses candle extremes. Equality is not a break. Open-bar results can change before close.",
+    display = display.data_window
+)
+i_cementLength       = input.int(
+    1,
+    "Cement lookback bars",
+    minval  = 1,
+    maxval  = 10,
+    step    = 1,
+    tooltip = "Number of preceding bars checked by Cement: bullish close above every high, or bearish close below every low. Not a count of consecutive Cement candles.",
+    group   = group_STRUCTURAL,
+    display = display.data_window
+)
+
+// Optional Fibonacci ratios; levels 0 and 1 are included by the display code.
+i_showFiboL2            = input.bool(false, "Enable 1", group = group_FIBO, inline = "L2")
+i_fiboL2                = input.float(
+    -0.272, "Ratio 1", step = 0.001, group = group_FIBO, inline = "L2",
+    tooltip = "Editable logarithmic ratio. The adjacent Enable switch controls this level. Ratios are used as entered; they are not sorted or deduplicated.",
+    display = display.data_window
+)
+i_showFiboL3            = input.bool(false, "Enable 2", group = group_FIBO, inline = "L3")
+i_fiboL3                = input.float(
+    0.236, "Ratio 2", step = 0.001, group = group_FIBO, inline = "L3",
+    tooltip = "Editable logarithmic ratio. The adjacent Enable switch controls this level. Ratios are used as entered; they are not sorted or deduplicated.",
+    display = display.data_window
+)
+i_showFiboL4            = input.bool(false, "Enable 3", group = group_FIBO, inline = "L4")
+i_fiboL4                = input.float(
+    0.382, "Ratio 3", step = 0.001, group = group_FIBO, inline = "L4",
+    tooltip = "Editable logarithmic ratio. The adjacent Enable switch controls this level. Ratios are used as entered; they are not sorted or deduplicated.",
+    display = display.data_window
+)
+i_showFiboL5            = input.bool(true, "Enable 4", group = group_FIBO, inline = "L5")
+i_fiboL5                = input.float(
+    0.5, "Ratio 4", step = 0.001, group = group_FIBO, inline = "L5",
+    tooltip = "Editable logarithmic ratio. The adjacent Enable switch controls this level. Ratios are used as entered; they are not sorted or deduplicated.",
+    display = display.data_window
+)
+i_showFiboL6            = input.bool(true, "Enable 5", group = group_FIBO, inline = "L6")
+i_fiboL6                = input.float(
+    0.618, "Ratio 5", step = 0.001, group = group_FIBO, inline = "L6",
+    tooltip = "Editable logarithmic ratio. The adjacent Enable switch controls this level. Ratios are used as entered; they are not sorted or deduplicated.",
+    display = display.data_window
+)
+i_showFiboL7            = input.bool(false, "Enable 6", group = group_FIBO, inline = "L7")
+i_fiboL7                = input.float(
+    0.700, "Ratio 6", step = 0.001, group = group_FIBO, inline = "L7",
+    tooltip = "Editable logarithmic ratio. The adjacent Enable switch controls this level. Ratios are used as entered; they are not sorted or deduplicated.",
+    display = display.data_window
+)
+i_showFiboL8            = input.bool(true, "Enable 7", group = group_FIBO, inline = "L8")
+i_fiboL8                = input.float(
+    0.786, "Ratio 7", step = 0.001, group = group_FIBO, inline = "L8",
+    tooltip = "Editable logarithmic ratio. The adjacent Enable switch controls this level. Ratios are used as entered; they are not sorted or deduplicated.",
+    display = display.data_window
+)
+i_showFiboL9            = input.bool(false, "Enable 8", group = group_FIBO, inline = "L9")
+i_fiboL9                = input.float(
+    1.272, "Ratio 8", step = 0.001, group = group_FIBO, inline = "L9",
+    tooltip = "Editable logarithmic ratio. The adjacent Enable switch controls this level. Ratios are used as entered; they are not sorted or deduplicated.",
+    display = display.data_window
+)
+
+// Display switches and colors.
+i_showCements           = input.bool(
+    false, "Cement markers", group = group_VISUAL,
+    tooltip = "Show opposite-Cement completion markers. Hiding markers does not disable Cement calculations."
+)
+i_showBreaks            = input.bool(
+    true, "BOS / CHoCH labels", group = group_VISUAL,
+    tooltip = "Show structural break lines and BOS/CHoCH labels. Labels are centered along the line; their position is not the event time."
+)
+i_showHighLows          = input.bool(
+    true, "Swing extreme markers", group = group_VISUAL,
+    tooltip = "Mark swing extremes at their original bars when a swing is drawn on completion or interruption."
+)
+i_showFibo              = input.bool(
+    true, "Show Fibonacci levels", group = group_FIBO,
+    tooltip = "Show logarithmic Fibonacci levels on the working swing. Levels 0 and 1 are always included; 0.5 is the geometric midpoint."
+)
+i_showCurrentBreakLines = input.bool(
+    true, "Working swing boundaries", group = group_VISUAL,
+    tooltip = "Show the working swing high and low. Break detection uses the reference swing, so these arrows can differ from the active break thresholds."
+)
+i_showFvgs              = input.bool(
+    false, "Show FVG fragments", group = group_FVG,
+    tooltip = "Show surviving gap fragments within the reference swing display range. Candle ranges can trim or split gaps. Tracking continues when hidden."
+)
+i_lineColor             = input.color(#4773A8, "Structure line color", group = group_VISUAL)
+i_fiboColor             = input.color(
+    color.new(#64748B, 20), "Fibonacci color", group = group_FIBO,
+    tooltip = "Color for Fibonacci lines and text in Custom mode. Boundary arrows have a separate color."
+)
+i_fvgDownColor          = input.color(color.new(#BA4C52, 90), "Bearish fragment color", group = group_FVG)
+i_fvgUpColor            = input.color(color.new(#087F7A, 90), "Bullish fragment color", group = group_FVG)
+i_boundaryColor = input.color(color.new(#4773A8, 40), "Boundary color", group = group_VISUAL)
+
+i_lineWidth             = input.int(1, title = "Structure line width", minval = 1, maxval = 5, step = 1, group = group_VISUAL, display = display.data_window)
+
+// =============================================================================
+// THEME-AWARE DISPLAY COLORS
+// =============================================================================
+// Chart-background brightness also accommodates custom light/dark chart backgrounds.
+isLightBackground = (color.r(chart.bg_color) + color.g(chart.bg_color) + color.b(chart.bg_color)) > 382.5
+useAutoColors     = i_colorMode == "Auto"
+
+structureColor = useAutoColors ? (isLightBackground ? #4773A8 : #7EA6D8) : i_lineColor
+bullColor      = useAutoColors ? (isLightBackground ? #087F7A : #45B8AD) : i_bullColor
+bearColor      = useAutoColors ? (isLightBackground ? #BA4C52 : #E48689) : i_bearColor
+fiboColor      = useAutoColors ? color.new(isLightBackground ? #64748B : #A1ACBE, 20) : i_fiboColor
+fiboTextColor  = useAutoColors and not isLightBackground ? #CBD5E1 : fiboColor
+boundaryColor  = useAutoColors ? color.new(structureColor, 40) : i_boundaryColor
+fvgUpColor     = useAutoColors ? color.new(bullColor, isLightBackground ? 90 : 87) : i_fvgUpColor
+fvgDownColor   = useAutoColors ? color.new(bearColor, isLightBackground ? 90 : 87) : i_fvgDownColor
+
+// =============================================================================
+// DATA TYPES
+// =============================================================================
+enum State
+    LOOK_FOR_DIRECTION = "Look for First Direction"
+    LOOK_FOR_SWING     = "Look for Swing"
+    LOOK_FOR_BREAK     = "Look For Break Up or Down"
+
+enum Direction
+    UP   = "Up"
+    DOWN = "Down"
+
+type Point
+    int   myIndex
+    float myLow
+    float myHigh
+    float myOpen
+    float myClose
+
+type CementCandle
+    Direction direction
+    Point     myPoint
+
+type Swing
+    Direction    direction
+    Point        swingHigh
+    Point        swingLow
+    CementCandle cement
+
+type Fvg
+    Direction direction
+    int       index
+    float     myLow
+    float     myHigh
+    bool      isFilled = false
+
+// =============================================================================
+// STRUCTURAL BOUNDARIES
+// =============================================================================
+// Equality is a touch, not a break. Close mode also evaluates on the open bar.
+is_break_up(Swing s, string source) =>
+    result = false
+    if not na(s)
+        result := (source == "Close" ? close : high) > s.swingHigh.myHigh
+    result
+
+is_break_down(Swing s, string source) =>
+    result = false
+    if not na(s)
+        result := (source == "Close" ? close : low) < s.swingLow.myLow
+    result
+
+// =============================================================================
+// LOGARITHMIC DISPLAY RANGE
+// =============================================================================
+// Expand the reference swing by its log-price range in both directions.
+get_swing_range_double_log(Swing s) =>
+    swingHighLog = math.log(s.swingHigh.myHigh)
+    swingLowLog  = math.log(s.swingLow.myLow)
+    swingRange   = swingHighLog - swingLowLog
+    fvgRangeHigh = math.exp(swingHighLog + swingRange)
+    fvgRangeLow  = math.exp(swingLowLog - swingRange)
+    [fvgRangeHigh, fvgRangeLow]
+
+// =============================================================================
+// DRAWING HELPERS
+// =============================================================================
+// Display surviving fragments from the current bar; stored gaps are maintained separately.
+draw_fvgs(Fvg[] fvgArr, box[] fvgBoxes, float fvgRangeHigh, float fvgRangeLow, color fvgUpColor, color fvgDownColor) =>
+    for fvgBox in fvgBoxes
+        fvgBox.delete()
+    fvgBoxes.clear()
+
+    for fvg in fvgArr
+        if fvg.myHigh <= fvgRangeHigh and fvg.myLow > fvgRangeLow
+            fvgBoxes.push(
+                box.new(
+                    bar_index,
+                    top          = fvg.myHigh,
+                    right        = bar_index + 30,
+                    bottom       = fvg.myLow,
+                    bgcolor      = fvg.direction == Direction.DOWN ? fvgDownColor : fvgUpColor,
+                    border_width = 0
+                )
+            )
+
+// Fibonacci levels use logarithmic prices, not linear interpolation.
+draw_swing_fibo(Swing s, line[] fiboLines, label[] fiboLabels, float[] fiboLevels, color fiboColor, color fiboTextColor) =>
+    for i = 0 to (array.size(fiboLines) == 0 ? na : array.size(fiboLines) - 1)
+        fiboLines.get(i).delete()
+    for i = 0 to (array.size(fiboLabels) == 0 ? na : array.size(fiboLabels) - 1)
+        fiboLabels.get(i).delete()
+    fiboLines.clear()
+    fiboLabels.clear()
+
+    if s.direction == Direction.UP
+        for i = 0 to array.size(fiboLevels) - 1
+            fiboVal = math.exp(
+                math.log(s.swingHigh.myHigh) - (math.log(s.swingHigh.myHigh) - math.log(s.swingLow.myLow)) * fiboLevels.get(i)
+            )
+            fiboLabels.push(
+                label.new(
+                    bar_index + 9,
+                    fiboVal,
+                    str.tostring(fiboLevels.get(i), '0.000') + " (" + str.tostring(fiboVal, format.mintick) + ")",
+                    color     = color.new(color.white, 100),
+                    style     = label.style_label_left,
+                    textcolor = fiboTextColor,
+                    size      = size.small
+                )
+            )
+            fiboLines.push(
+                line.new(
+                    s.swingHigh.myIndex,
+                    fiboVal,
+                    bar_index + 10,
+                    fiboVal,
+                    width = 1,
+                    style = line.style_dotted,
+                    color = fiboColor
+                )
+            )
+    else
+        for i = 0 to array.size(fiboLevels) - 1
+            fiboVal = math.exp(
+                math.log(s.swingLow.myLow) - (math.log(s.swingLow.myLow) - math.log(s.swingHigh.myHigh)) * fiboLevels.get(i)
+            )
+            fiboLabels.push(
+                label.new(
+                    bar_index + 9,
+                    fiboVal,
+                    str.tostring(fiboLevels.get(i), '0.000') + " (" + str.tostring(fiboVal, format.mintick) + ")",
+                    color     = color.new(color.white, 100),
+                    style     = label.style_label_left,
+                    textcolor = fiboTextColor,
+                    size      = size.small
+                )
+            )
+            fiboLines.push(
+                line.new(
+                    s.swingLow.myIndex,
+                    fiboVal,
+                    bar_index + 10,
+                    fiboVal,
+                    width = 1,
+                    style = line.style_dotted,
+                    color = fiboColor
+                )
+            )
+
+draw_swing_limit_lines(Swing s, line[] lines, color lineColor) =>
+    for i = 0 to (array.size(lines) == 0 ? na : array.size(lines) - 1)
+        lines.get(i).delete()
+    lines.clear()
+    lines.push(
+        line.new(
+            s.swingHigh.myIndex,
+            s.swingHigh.myHigh,
+            bar_index + 10,
+            s.swingHigh.myHigh,
+            width = 1,
+            style = line.style_arrow_right,
+            color = lineColor
+        )
+    )
+    lines.push(
+        line.new(
+            s.swingLow.myIndex,
+            s.swingLow.myLow,
+            bar_index + 10,
+            s.swingLow.myLow,
+            width = 1,
+            style = line.style_arrow_right,
+            color = lineColor
+        )
+    )
+
+draw_cement_point(CementCandle candle) =>
+    label.new(
+        bar_index,
+        candle.direction == Direction.DOWN ? candle.myPoint.myLow : candle.myPoint.myHigh,
+        style = candle.direction == Direction.DOWN ? label.style_triangledown : label.style_triangleup,
+        color = candle.direction == Direction.DOWN ? bearColor : bullColor,
+        size  = 2,
+        yloc  = candle.direction == Direction.DOWN ? yloc.belowbar : yloc.abovebar
+    )
+
+draw_swing_high_point(Swing s) =>
+    label.new(
+        s.swingHigh.myIndex,
+        s.swingHigh.myHigh,
+        style = label.style_circle,
+        color = bullColor,
+        size  = 2,
+        yloc  = yloc.abovebar
+    )
+
+draw_swing_low_point(Swing s) =>
+    label.new(
+        s.swingLow.myIndex,
+        s.swingLow.myLow,
+        style = label.style_circle,
+        color = bearColor,
+        size  = 2,
+        yloc  = yloc.belowbar
+    )
+
+// Endpoints use extreme-bar coordinates; the drawing is created on completion/interruption.
+draw_swing(Swing s, int lineWidth, color lineColor, bool showHighLows) =>
+    line s_line = na
+    if s.direction == Direction.UP
+        s_line := line.new(
+            s.swingLow.myIndex,
+            s.swingLow.myLow,
+            s.swingHigh.myIndex,
+            s.swingHigh.myHigh,
+            color = lineColor,
+            width = lineWidth,
+            style = line.style_solid
+        )
+    if s.direction == Direction.DOWN
+        s_line := line.new(
+            s.swingHigh.myIndex,
+            s.swingHigh.myHigh,
+            s.swingLow.myIndex,
+            s.swingLow.myLow,
+            color = lineColor,
+            width = lineWidth,
+            style = line.style_solid
+        )
+    if showHighLows
+        draw_swing_high_point(s)
+        draw_swing_low_point(s)
+    s_line
+
+// Classify against the reference swing. Label placement is not the event availability time.
+draw_breakout(Swing s, bool isBreakUp, color lineColor) =>
+    if isBreakUp
+        lblText = s.direction == Direction.UP ? "BOS" : "CHoCH"
+        line.new(
+            s.swingHigh.myIndex,
+            s.swingHigh.myHigh,
+            bar_index,
+            s.swingHigh.myHigh,
+            width = 1,
+            style = line.style_dashed,
+            color = isBreakUp ? bullColor : bearColor
+        )
+        label.new(
+            int(math.avg(s.swingHigh.myIndex, bar_index)),
+            s.swingHigh.myHigh,
+            lblText,
+            style     = label.style_label_down,
+            color     = color.new(color.black, 100),
+            textcolor = bullColor,
+            size      = size.small
+        )
+    else
+        lblText = s.direction == Direction.DOWN ? "BOS" : "CHoCH"
+        line.new(
+            s.swingLow.myIndex,
+            s.swingLow.myLow,
+            bar_index,
+            s.swingLow.myLow,
+            width = 1,
+            style = line.style_dashed,
+            color = isBreakUp ? bullColor : bearColor
+        )
+        label.new(
+            int(math.avg(s.swingLow.myIndex, bar_index)),
+            s.swingLow.myLow,
+            lblText,
+            style     = label.style_label_up,
+            color     = color.new(color.black, 100),
+            textcolor = bearColor,
+            size      = size.small
+        )
+
+// =============================================================================
+// PRICE SNAPSHOTS AND CEMENT
+// =============================================================================
+get_point_current() =>
+    Point result = Point.new(bar_index, low, high, open, close)
+    result
+
+// A bearish Cement closes strictly below every low of the previous N bars.
+is_bearish_cemented_candle(int n) =>
+    bool isTrue = true
+    for i = 1 to n
+        isTrue := isTrue and close < low[i]
+    isTrue
+
+// A bullish Cement closes strictly above every high of the previous N bars.
+is_bullish_cemented_candle(int n) =>
+    bool isTrue = true
+    for i = 1 to n
+        isTrue := isTrue and close > high[i]
+    isTrue
+
+// =============================================================================
+// FAIR VALUE GAP TRACKING
+// =============================================================================
+// Detect three-bar gaps without a middle-candle displacement requirement.
+get_fvg() =>
+    Fvg fvg = na
+    if high < low[2]
+        fvg := Fvg.new(Direction.DOWN, bar_index - 1, high, low[2])
+    if low > high[2]
+        fvg := Fvg.new(Direction.UP, bar_index - 1, high[2], low)
+    fvg
+
+// Subtract each candle range from stored gaps, trimming or splitting surviving fragments.
+check_fvg(Fvg[] fvgArr) =>
+    Fvg[] removeArr = array.new<Fvg>()
+    Fvg[] addArr    = array.new<Fvg>()
+    for fvg in fvgArr
+        if high >= fvg.myHigh and low <= fvg.myLow
+            removeArr.push(fvg)
+        else if low > fvg.myLow and low < fvg.myHigh and high >= fvg.myHigh
+            removeArr.push(fvg)
+            addArr.push(Fvg.new(fvg.direction, fvg.index, fvg.myLow, low))
+        else if high < fvg.myHigh and high > fvg.myLow and low <= fvg.myLow
+            removeArr.push(fvg)
+            addArr.push(Fvg.new(fvg.direction, fvg.index, high, fvg.myHigh))
+        else if high < fvg.myHigh and low > fvg.myLow
+            removeArr.push(fvg)
+            addArr.push(Fvg.new(fvg.direction, fvg.index, high, fvg.myHigh))
+            addArr.push(Fvg.new(fvg.direction, fvg.index, fvg.myLow, low))
+
+    // Apply changes after traversing the original fragments.
+    for removeFvg in removeArr
+        fvgArr.remove(fvgArr.indexof(removeFvg))
+    for addFvg in addArr
+        fvgArr.push(addFvg)
+    true
+
+// =============================================================================
+// PERSISTENT STRUCTURAL STATE
+// =============================================================================
+var State        currentState      = na
+var Swing        currentSwing      = na
+var Swing        lastSwing         = na
+var CementCandle lastCementCandle  = na
+var Point        lastHighPoint     = na
+var Point        lastLowPoint      = na
+var bool         isComingFromSwing = false
+var Fvg[]        fvgArr            = array.new<Fvg>()
+
+// =============================================================================
+// DRAWING STORAGE
+// =============================================================================
+var float[] fiboLevels      = array.new<float>()
+var line[]  fiboLines       = array.new<line>()
+var label[] fiboLabels      = array.new<label>()
+var line[]  swingLimitLines = array.new<line>()
+var box[]   fvgBoxes        = array.new<box>()
+
+// =============================================================================
+// INITIALIZATION
+// =============================================================================
+if barstate.isfirst
+    pt            = get_point_current()
+    lastHighPoint := pt
+    lastLowPoint  := pt
+    currentSwing  := Swing.new(na, pt, pt)
+    currentState  := State.LOOK_FOR_DIRECTION
+
+// Evaluate Cement predicates on each execution.
+isBullishCem = is_bullish_cemented_candle(i_cementLength)
+isBearishCem = is_bearish_cemented_candle(i_cementLength)
+
+// =============================================================================
+// INITIAL DIRECTION
+// =============================================================================
+// The first Cement seeds direction before a mature structural reference exists.
+if currentState == State.LOOK_FOR_DIRECTION
+    if isBullishCem
+        if na(lastCementCandle)
+            lastCementCandle       := CementCandle.new(Direction.UP, get_point_current())
+            currentSwing.direction := Direction.DOWN
+            currentSwing.swingHigh := lastHighPoint
+            currentSwing.swingLow  := lastLowPoint
+            lastSwing              := currentSwing.copy()
+            currentSwing           := Swing.new(Direction.UP, get_point_current(), lastSwing.swingLow)
+            lastHighPoint          := get_point_current()
+            currentState           := State.LOOK_FOR_SWING
+        else
+            if lastCementCandle.direction == Direction.DOWN
+                if i_showCements
+                    draw_cement_point(CementCandle.new(Direction.UP, get_point_current()))
+                currentSwing.direction := Direction.DOWN
+                currentSwing.swingLow  := lastLowPoint
+                currentSwing.swingHigh := lastHighPoint
+                draw_swing(currentSwing, i_lineWidth, structureColor, i_showHighLows)
+                lastSwing     := currentSwing.copy()
+                currentSwing  := Swing.new(Direction.UP, get_point_current(), lastSwing.swingLow)
+                lastHighPoint := get_point_current()
+                currentState  := State.LOOK_FOR_BREAK
+    else if isBearishCem
+        if na(lastCementCandle)
+            lastCementCandle       := CementCandle.new(Direction.DOWN, get_point_current())
+            currentSwing.direction := Direction.UP
+            currentSwing.swingLow  := lastLowPoint
+            currentSwing.swingHigh := lastHighPoint
+            lastSwing              := currentSwing.copy()
+            currentSwing           := Swing.new(Direction.DOWN, lastSwing.swingHigh, get_point_current())
+            lastLowPoint           := get_point_current()
+            currentState           := State.LOOK_FOR_SWING
+        else
+            if lastCementCandle.direction == Direction.UP
+                if i_showCements
+                    draw_cement_point(CementCandle.new(Direction.DOWN, get_point_current()))
+                currentSwing.direction := Direction.UP
+                currentSwing.swingHigh := lastHighPoint
+                currentSwing.swingLow  := lastLowPoint
+                draw_swing(currentSwing, i_lineWidth, structureColor, i_showHighLows)
+                lastSwing    := currentSwing.copy()
+                currentSwing := Swing.new(Direction.DOWN, lastSwing.swingHigh, get_point_current())
+                lastLowPoint := get_point_current()
+                currentState := State.LOOK_FOR_BREAK
+    if currentState != State.LOOK_FOR_BREAK
+        if high > lastHighPoint.myHigh
+            lastHighPoint := get_point_current()
+        if low < lastLowPoint.myLow
+            lastLowPoint := get_point_current()
+
+// =============================================================================
+// IMPULSE TRACKING AND COMPLETION
+// =============================================================================
+// Opposite boundary breaks take priority over extreme updates and Cement completion.
+if currentState == State.LOOK_FOR_SWING
+    if currentSwing.direction == Direction.UP
+        if is_break_down(lastSwing, i_breakSource)
+            isComingFromSwing := true
+            currentState      := State.LOOK_FOR_BREAK
+        else
+            if high > currentSwing.swingHigh.myHigh
+                currentSwing.swingHigh := get_point_current()
+            if isBearishCem
+                if i_showCements
+                    draw_cement_point(CementCandle.new(Direction.DOWN, get_point_current()))
+                draw_swing(currentSwing, i_lineWidth, structureColor, i_showHighLows)
+                lastSwing    := currentSwing.copy()
+                lastLowPoint := get_point_current()
+                currentState := State.LOOK_FOR_BREAK
+
+    if currentSwing.direction == Direction.DOWN
+        if is_break_up(lastSwing, i_breakSource)
+            isComingFromSwing := true
+            currentState      := State.LOOK_FOR_BREAK
+        else
+            if low < currentSwing.swingLow.myLow
+                currentSwing.swingLow := get_point_current()
+            if isBullishCem
+                if i_showCements
+                    draw_cement_point(CementCandle.new(Direction.UP, get_point_current()))
+                draw_swing(currentSwing, i_lineWidth, structureColor, i_showHighLows)
+                lastSwing     := currentSwing.copy()
+                lastHighPoint := get_point_current()
+                currentState  := State.LOOK_FOR_BREAK
+
+// =============================================================================
+// STRUCTURAL BREAKS
+// =============================================================================
+// Keep state blocks and up/down tests sequential: multiple paths may execute on one bar.
+if currentState == State.LOOK_FOR_BREAK
+    // Finalize the interrupted impulse before classifying the reverse break.
+    if isComingFromSwing
+        isComingFromSwing := false
+        draw_swing(currentSwing, i_lineWidth, structureColor, i_showHighLows)
+        lastSwing := currentSwing.copy()
+        if lastSwing.direction == Direction.DOWN
+            currentSwing := Swing.new(Direction.UP, get_point_current(), lastSwing.swingLow)
+        if lastSwing.direction == Direction.UP
+            currentSwing := Swing.new(Direction.DOWN, lastSwing.swingHigh, get_point_current())
+        if i_showBreaks
+            draw_breakout(lastSwing, is_break_up(lastSwing, i_breakSource), structureColor)
+        currentState := State.LOOK_FOR_SWING
+    else
+        if is_break_up(lastSwing, i_breakSource)
+            if lastSwing.direction == Direction.UP
+                draw_swing(
+                    Swing.new(Direction.DOWN, lastSwing.swingHigh, lastLowPoint),
+                    i_lineWidth,
+                    structureColor,
+                    false
+                )
+                currentSwing.direction := Direction.UP
+                currentSwing.swingHigh := get_point_current()
+                currentSwing.swingLow  := lastLowPoint
+            else
+                currentSwing.direction := Direction.UP
+                currentSwing.swingHigh := get_point_current()
+            if i_showBreaks
+                draw_breakout(lastSwing, true, structureColor)
+            currentState := State.LOOK_FOR_SWING
+
+        if is_break_down(lastSwing, i_breakSource)
+            if lastSwing.direction == Direction.DOWN
+                draw_swing(
+                    Swing.new(Direction.UP, lastHighPoint, lastSwing.swingLow),
+                    i_lineWidth,
+                    structureColor,
+                    false
+                )
+                currentSwing.direction := Direction.DOWN
+                currentSwing.swingHigh := lastHighPoint
+                currentSwing.swingLow  := get_point_current()
+            else
+                currentSwing.direction := Direction.DOWN
+                currentSwing.swingLow  := get_point_current()
+            if i_showBreaks
+                draw_breakout(lastSwing, false, structureColor)
+            currentState := State.LOOK_FOR_SWING
+    // Update candidate extremes after break construction to preserve anchor selection.
+    if low < lastLowPoint.myLow
+        lastLowPoint := get_point_current()
+    if high > lastHighPoint.myHigh
+        lastHighPoint := get_point_current()
+
+// =============================================================================
+// FVG MAINTENANCE
+// =============================================================================
+currentFvg = get_fvg()
+if not na(currentFvg)
+    fvgArr.push(currentFvg)
+check_fvg(fvgArr)
+
+// =============================================================================
+// LATEST-BAR DISPLAY
+// =============================================================================
+// Display boundaries follow currentSwing; break predicates use lastSwing.
+if barstate.islast
+    array.clear(fiboLevels)
+    array.push(fiboLevels, 0.0)
+    if i_showFiboL2
+        array.push(fiboLevels, i_fiboL2)
+    if i_showFiboL3
+        array.push(fiboLevels, i_fiboL3)
+    if i_showFiboL4
+        array.push(fiboLevels, i_fiboL4)
+    if i_showFiboL5
+        array.push(fiboLevels, i_fiboL5)
+    if i_showFiboL6
+        array.push(fiboLevels, i_fiboL6)
+    if i_showFiboL7
+        array.push(fiboLevels, i_fiboL7)
+    if i_showFiboL8
+        array.push(fiboLevels, i_fiboL8)
+    if i_showFiboL9
+        array.push(fiboLevels, i_fiboL9)
+    array.push(fiboLevels, 1.0)
+
+    // Draw only the enabled layers.
+    if i_showFibo
+        draw_swing_fibo(currentSwing, fiboLines, fiboLabels, fiboLevels, fiboColor, fiboTextColor)
+    if i_showCurrentBreakLines
+        draw_swing_limit_lines(currentSwing, swingLimitLines, boundaryColor)
+    if i_showFvgs
+        [fvgRangeHigh, fvgRangeLow] = get_swing_range_double_log(lastSwing)
+        draw_fvgs(fvgArr, fvgBoxes, fvgRangeHigh, fvgRangeLow, fvgUpColor, fvgDownColor)

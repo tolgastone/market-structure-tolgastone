@@ -1,0 +1,38 @@
+# Private development records and local sessions
+/.ai/
+/.codex/
+/.agents/
+/.chatgpt/
+/.claude/
+/AGENTS.local.md
+/CLAUDE.local.md
+
+# Local editor/workspace settings
+/.vscode/
+/.idea/
+*.code-workspace
+*.suo
+*.user
+*.sln.docstates
+
+# Machine-specific files, credentials, and temporary output
+.DS_Store
+Thumbs.db
+Desktop.ini
+/.aws/
+.env
+.env.*
+!.env.example
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~
+__pycache__/
+
+# Public README, docs/, examples/, license, and contributor guidance stay visible.
+
+# Local release previews and archives
+/.release/
