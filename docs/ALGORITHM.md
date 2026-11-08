@@ -95,6 +95,8 @@ No middle-candle displacement requirement is applied. Each current candle range 
 
 Storage is maintained even when FVG display is hidden. Display requires the entire fragment to lie within a log-expanded reference-swing range: upper bound inclusive, lower bound strict. Boxes extend from the current bar to 30 bars ahead, rather than from the original gap bar.
 
+In v1.2.1, eligible fragments are sorted by low price and overlapping or touching intervals are united separately for each direction. Each union is drawn once, avoiding same-direction stacked opacity. Positive gaps remain separate; bullish and bearish unions keep their colors and may overlap. The full-fragment range filter is applied before union. Stored gaps and their mitigation remain independent of these display-only unions.
+
 ## Availability and current limits
 
 ### Realtime evaluation versus pivot-window confirmation

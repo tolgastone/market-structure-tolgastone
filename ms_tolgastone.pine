@@ -351,24 +351,51 @@ update_zone_label(label existing, int labelBar, float price, string labelText, c
 // =============================================================================
 // DRAWING HELPERS
 // =============================================================================
-// Display surviving fragments from the current bar; stored gaps are maintained separately.
+// Draw one union interval. All FVG boxes share the same horizontal extent.
+draw_fvg_region(float bottomPrice, float topPrice, box[] fvgBoxes, color fillColor) =>
+    fvgBoxes.push(
+        box.new(
+            bar_index, top = topPrice, right = bar_index + 30, bottom = bottomPrice,
+            bgcolor = fillColor, border_width = 0
+        )
+    )
+
+// Filter original fragments first, then union visible intervals per direction.
+// Sort temporary price arrays; never mutate stored FVGs or bridge a positive gap.
+draw_fvg_side(Fvg[] fvgArr, box[] fvgBoxes, float rangeHigh, float rangeLow, bool bearish, color fillColor) =>
+    float[] lowPrices = array.new<float>()
+    float[] highPrices = array.new<float>()
+    for fvg in fvgArr
+        if (fvg.direction == Direction.DOWN) == bearish and fvg.myHigh <= rangeHigh and fvg.myLow > rangeLow
+            lowPrices.push(fvg.myLow)
+            highPrices.push(fvg.myHigh)
+
+    sortedIndices = array.sort_indices(lowPrices, order.ascending)
+    float mergedLow = na
+    float mergedHigh = na
+    for idx in sortedIndices
+        float nextLow = lowPrices.get(idx)
+        float nextHigh = highPrices.get(idx)
+        if na(mergedLow)
+            mergedLow := nextLow
+            mergedHigh := nextHigh
+        else if nextLow <= mergedHigh
+            mergedHigh := math.max(mergedHigh, nextHigh)
+        else
+            draw_fvg_region(mergedLow, mergedHigh, fvgBoxes, fillColor)
+            mergedLow := nextLow
+            mergedHigh := nextHigh
+    if not na(mergedLow)
+        draw_fvg_region(mergedLow, mergedHigh, fvgBoxes, fillColor)
+
+// Display-only union: bullish and bearish regions retain their own colors.
 draw_fvgs(Fvg[] fvgArr, box[] fvgBoxes, float fvgRangeHigh, float fvgRangeLow, color fvgUpColor, color fvgDownColor) =>
     for fvgBox in fvgBoxes
         fvgBox.delete()
     fvgBoxes.clear()
 
-    for fvg in fvgArr
-        if fvg.myHigh <= fvgRangeHigh and fvg.myLow > fvgRangeLow
-            fvgBoxes.push(
-                box.new(
-                    bar_index,
-                    top          = fvg.myHigh,
-                    right        = bar_index + 30,
-                    bottom       = fvg.myLow,
-                    bgcolor      = fvg.direction == Direction.DOWN ? fvgDownColor : fvgUpColor,
-                    border_width = 0
-                )
-            )
+    draw_fvg_side(fvgArr, fvgBoxes, fvgRangeHigh, fvgRangeLow, false, fvgUpColor)
+    draw_fvg_side(fvgArr, fvgBoxes, fvgRangeHigh, fvgRangeLow, true, fvgDownColor)
 
 // Fibonacci levels use logarithmic prices, not linear interpolation.
 draw_swing_fibo(Swing s, line[] fiboLines, label[] fiboLabels, float[] fiboLevels, color fiboColor, color fiboTextColor) =>

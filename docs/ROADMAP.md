@@ -1,6 +1,6 @@
 # Roadmap and research ideas
 
-MST v1.2.0 is the current release. It adds opt-in structural break tolerance; None retains the published baseline. This document is the working backlog for future releases and separate experiments. It records direction, not a promise of delivery dates or a claim that the listed features already exist. Priorities and proposed versions can change as the design and evidence develop.
+MST v1.2.1 is the current release, including the FVG display union fix. It adds opt-in structural break tolerance; None retains the published baseline. This document is the working backlog for future releases and separate experiments. It records direction, not a promise of delivery dates or a claim that the listed features already exist. Priorities and proposed versions can change as the design and evidence develop.
 
 ## Development principles
 
@@ -10,7 +10,7 @@ MST v1.2.0 is the current release. It adds opt-in structural break tolerance; No
 - Treat altered break thresholds, Cement completion rules and confirmation policies as behavior changes requiring explicit design and comparison.
 - Validate experiments in a separate Lab before considering an optional product mode. Listing an experiment here does not authorize implementation or merging it into the published engine.
 
-**Delivered:** v1.1.0 Swing Zones. See the [Swing Zones guide](SWING_ZONES.md). v1.2.0 adds optional Break Tolerance; BSL/SSL and sweep observations remain separate backlog items.
+**Delivered:** v1.2.1 FVG Display Fix and v1.1.0 Swing Zones. See the [Swing Zones guide](SWING_ZONES.md). v1.2.0 adds optional Break Tolerance; BSL/SSL and sweep observations remain separate backlog items.
 
 ## Proposed release sequence
 

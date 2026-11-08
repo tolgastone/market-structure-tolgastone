@@ -66,6 +66,8 @@ FVGs are detected using the current bar and the bar two periods earlier. Later c
 
 Visible boxes show surviving fragments inside the reference swing's display range. They start at the current bar and extend 30 bars to the right; they do not identify the original gap candle. A missing box can mean a fragment is outside the display range, not that every stored gap has been filled.
 
+v1.2.1 draws overlapping/touching same-direction fragments as a single region. A positive price gap remains visible, and opposite directions keep separate colors. The merge changes only the drawing; each stored fragment continues its existing lifecycle.
+
 Turning **Show FVG fragments** off hides the boxes but leaves tracking active. The two fragment color controls change appearance only.
 
 ## Separate chart position from availability

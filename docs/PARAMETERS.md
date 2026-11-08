@@ -1,6 +1,6 @@
 # Parameter reference
 
-These names and defaults match the current [`ms_tolgastone.pine`](../ms_tolgastone.pine). The indicator exposes **46 inputs in six groups** in the working source, including five v1.2.0 break-tolerance controls (the published v1.1.0 has 41 inputs). The classic view emphasizes structure: Cement markers and FVG fragments are hidden; only optional Fibonacci ratios 0.5, 0.618 and 0.786 are enabled.
+These names and defaults match the current [`ms_tolgastone.pine`](../ms_tolgastone.pine). The indicator exposes **46 inputs in six groups**, including five v1.2.0 break-tolerance controls. The classic view emphasizes structure: Cement markers and FVG fragments are hidden; only optional Fibonacci ratios 0.5, 0.618 and 0.786 are enabled.
 
 ## Appearance — 3 inputs
 
@@ -74,6 +74,8 @@ Prices are interpolated logarithmically. Ratio 0.5 is the geometric midpoint. Cl
 | Show FVG fragments | Off | Shows surviving fragments inside the reference swing's log-expanded display range. Tracking continues when hidden. |
 | Bearish fragment color | Coral `#BA4C52`; transparency 90 | Appearance of bearish fragments in Custom mode. |
 | Bullish fragment color | Teal `#087F7A`; transparency 90 | Appearance of bullish fragments in Custom mode. |
+
+v1.2.1 merges overlapping/touching visible fragments separately per direction before drawing. It adds no input and does not merge stored FVG records. Opposite directions remain separate; positive gaps are preserved.
 
 Color transparency uses the Pine scale: 0 is opaque and 100 is invisible. No gap-age, minimum-size, mitigation-mode or storage-limit inputs are provided.
 

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 1.2.1 — 2026-11-08
+
+### Changed
+
+- Merge overlapping or touching same-direction FVG fragments into one display region to avoid stacked opacity. Opposite directions retain separate colors.
+- Preserve stored fragments, mitigation rules, full-fragment range eligibility and the reference-swing logarithmic display range.
+
 ## 1.2.0 — 2026-11-08
 
 ### Added

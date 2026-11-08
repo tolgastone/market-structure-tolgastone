@@ -18,7 +18,9 @@ Fibonacci levels use logarithmic prices: 0.5 is a geometric midpoint. FVG tracki
 
 Read [The MST approach](docs/ALGORITHM.md) for the structural cycle, an example, and the implementation details behind the drawings.
 
-**Current release:** [v1.2.0 — Break Tolerance](https://github.com/tolgastone/market-structure-tolgastone/releases/tag/v1.2.0).
+**Current release:** [v1.2.1 — FVG Display Fix](https://github.com/tolgastone/market-structure-tolgastone/releases/tag/v1.2.1).
+
+v1.2.1 draws overlapping or touching same-direction FVG fragments once, avoiding stacked opacity. Stored gaps, mitigation and the logarithmic display range are unchanged. See the [release notes](docs/releases/v1.2.1.md).
 
 v1.2.0 adds optional Percent/ATR break tolerance and filtered-crossing T markers. None is the default and preserves the preceding structural behavior. These controls change break acceptance when enabled; see [Break tolerance](docs/BREAK_TOLERANCE.md) and the [v1.2.0 release notes](docs/releases/v1.2.0.md).
 
