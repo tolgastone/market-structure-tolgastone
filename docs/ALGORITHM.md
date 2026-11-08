@@ -74,9 +74,13 @@ Displayed Fibonacci levels use the working swing and logarithmic prices. For hig
 - UP: `exp(log(H) - (log(H) - log(L)) * r)`
 - DOWN: `exp(log(L) + (log(H) - log(L)) * r)`
 
-At r=0.5, the price is the geometric midpoint `sqrt(H * L)`. Levels 0 and 1 are always included when Fibonacci is shown. Positive prices are required by these calculations.
+At r=0.5, the price is the geometric midpoint `sqrt(H * L)`. For H=200 and L=100, this is approximately 141.42, not the arithmetic midpoint 150. Levels 0 and 1 are always included when Fibonacci is shown. Positive prices are required by these calculations.
 
 The current boundary arrows also follow the working swing. Actual break predicates use the reference swing. The arrows should not be assumed to show the exact reference levels throughout an extending impulse.
+
+The reference-swing display filter uses the same log-price geometry: its upper bound is `H * H / L`, and its lower bound is `L * L / H`. This expands the swing by one log-range in each direction. The code calculates these with `log` and `exp`.
+
+Changing the chart price axis between linear and logarithmic does not change these calculations. Breaks, Cement and FVG lifecycle conditions use direct OHLC comparisons; only the stated level/range calculations interpolate in log space.
 
 ## Fair value gaps
 

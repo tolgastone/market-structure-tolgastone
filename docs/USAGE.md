@@ -47,6 +47,8 @@ The levels use log prices, so 0.5 is the geometric midpoint rather than the arit
 
 The numeric 0.618 and 0.786 lines are individual levels, not a dedicated OTE zone. **Fibonacci color** and **Boundary color** are independent controls in Custom mode. Auto supplies separate muted colors for both layers.
 
+The logarithmic formulas remain in use whether the chart price axis is linear or logarithmic; there is no linear-Fibonacci mode. For example, a 100–200 swing has its 0.5 level near 141.42, not 150. The FVG display-range filter also uses log-price geometry. This does not change the direct OHLC comparisons used for breaks, Cement or gap maintenance.
+
 ## Read FVG fragments
 
 FVGs are detected using the current bar and the bar two periods earlier. Later candle ranges can remove, trim or split a stored gap. A first touch does not automatically remove the entire gap.

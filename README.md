@@ -20,6 +20,16 @@ Read [The MST approach](docs/ALGORITHM.md) for the structural cycle, an example,
 
 **Current release:** [v1.0.0](https://github.com/tolgastone/market-structure-tolgastone/releases/tag/v1.0.0).
 
+## Logarithmic price geometry
+
+MST uses logarithmic prices for swing Fibonacci levels and for the expanded reference-swing range that filters visible FVG fragments. Distances in log space represent price ratios rather than equal absolute price differences. There is no linear-Fibonacci calculation mode.
+
+For a swing from 100 to 200, the 0.5 level is `sqrt(100 * 200)`, approximately **141.42**, rather than the arithmetic midpoint of 150. The expanded FVG display range extends one log-swing distance below the low and above the high.
+
+The chart's linear/log price-axis setting does not change these formulas. All prices used in logarithmic calculations must be positive.
+
+Boundary breaks, Cement predicates, and FVG creation/trimming still compare actual OHLC prices directly. Logarithmic geometry does not replace those structural rules or make FVG detection a logarithmic interpolation.
+
 ## Documentation
 
 - [Illustrated concepts](docs/CONCEPTS.md): Cement candles, BOS, CHoCH and FVG.
