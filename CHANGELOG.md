@@ -2,9 +2,17 @@
 
 ## Unreleased
 
+## 1.3.0 — 2026-11-15
+
+### Added
+
+- Selectable impulse completion policies: Single Cement (default), Two Cements allowing intervening bars, and First Cement Boundary using a later close beyond the first opposite Cement wick boundary.
+- Reset pending candidates/counts at a strict new impulse extreme and at structural break transitions. Cement bootstrap and structural interruption priority are retained.
+- Completion-policy guide, examples and synchronized parameter/usage documentation. Boundary-mode completion markers may identify non-Cement confirmation candles.
+
 ### Documentation
 
-- Reconcile completed releases through v1.2.2 and the current work order. Prioritize Cement completion design/comparison; defer alerts, with OTE contact first when resumed.
+- Document the three completion policies, candidate lifecycle and comparison examples; retain deferred alerts with OTE contact first when resumed.
 
 ## 1.2.2 — 2026-11-08
 

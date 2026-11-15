@@ -1,6 +1,6 @@
 # Roadmap and research ideas
 
-MST v1.2.2 is the current release, including drawing reuse and the FVG display union fix. It adds opt-in structural break tolerance; None retains the published baseline. This document is the working backlog for future releases and separate experiments. It records direction, not a promise of delivery dates or a claim that the listed features already exist. Priorities and proposed versions can change as the design and evidence develop.
+MST v1.3.0 is the current release, adding selectable Cement completion policies alongside drawing reuse and the FVG display union fix. It adds opt-in structural break tolerance; None retains the published baseline. This document is the working backlog for future releases and separate experiments. It records direction, not a promise of delivery dates or a claim that the listed features already exist. Priorities and proposed versions can change as the design and evidence develop.
 
 ## Development principles
 
@@ -19,6 +19,7 @@ MST v1.2.2 is the current release, including drawing reuse and the FVG display u
 | v1.2.0 — Break Tolerance | None / Percent / ATR structural acceptance, previous closed-bar ATR sampling and optional T markers; None retains baseline behavior |
 | v1.2.1 — FVG Display Fix | Display-only union of overlapping/touching same-direction fragments; stored-gap lifecycle and visibility range retained |
 | v1.2.2 — Drawing Reuse | Reuse working boundary arrows, classic Fibonacci line/label pairs and FVG boxes; remove surplus objects and recreate missing handles |
+| v1.3.0 — Cement Completion | Single Cement (default), Two Cements and First Cement Boundary; strict-new-extreme candidate reset with bootstrap/interruption rules retained |
 
 FVG display union and drawing reuse are complete. FVG age/count/mitigation controls and long-history storage optimization are separate, unfinished items. Reusing boxes does not reduce stored fragment history.
 
@@ -26,12 +27,12 @@ See the [changelog](../CHANGELOG.md), [Swing Zones](SWING_ZONES.md) and [Break t
 
 ## Current work order
 
-This order replaces the earlier release sketch that put Alerts & Display next. Future version numbers will be assigned after scope and compatibility are established; there is no committed v1.3 or v2.0 feature bundle.
+This order replaces the earlier release sketch that put Alerts & Display next. Future version numbers will be assigned after scope and compatibility are established; later feature bundles and version numbers are not committed.
 
 | Order | Workstream | Status and next boundary |
 | --- | --- | --- |
-| 1 — next design task | Cement completion options | Define and illustrate the existing single opposite Cement, two opposite Cements with intervening bars, consecutive opposite Cements, and confirmation beyond the first opposite Cement's boundary. Design and comparison first; no new completion mode is implemented or selected for release. |
-| 2 | Separate Cement experiment | After rules are agreed, compare a selected candidate with the published baseline in a separate Lab. Assess delay, new extremes, interruption and the subsequent swing chain before deciding whether to offer an optional product mode. |
+| Delivered | v1.3.0 Cement Completion | Single Cement (default), Two Cements and First Cement Boundary released. Consecutive-only confirmation remains a separate candidate. |
+| 2 | Evaluate completion alternatives in use | Continue comparing completion delay, changed extremes and subsequent swing chains. Single Cement stays the default; no policy is claimed to be universally superior. Future fractal-only completion remains a separate design candidate. |
 | 3 | Boundary observations and quality work | BSL/SSL and sweep overlays remain candidates, alongside drawing controls and measured FVG storage/maintenance work. Select a narrow task based on observed need; these are not prerequisites for Cement research. |
 | 4 | Advanced structure | Assess EQH/EQL, Internal Structure, MSS, Displacement and Order Blocks individually. Dependencies and exact definitions come before implementation. |
 | Last | Alerts | Deferred. OTE contact is the first alert priority when this workstream is opened; structural, Cement and liquidity alerts follow later. |
@@ -79,7 +80,7 @@ These feature names are working labels. They do not establish a single universal
 
 ## Research pool — separate from the published engine
 
-Percent minimum penetration and ATR thresholds have been selected for an opt-in v1.2.0 product option; see [Break tolerance](BREAK_TOLERANCE.md). Cement completion options are the next design/comparison task. Other candidates below remain research; no experimental completion rule is included in the published source.
+Percent minimum penetration and ATR thresholds have been selected for an opt-in v1.2.0 product option; see [Break tolerance](BREAK_TOLERANCE.md). Cement completion options were delivered in v1.3.0: two opt-in alternatives accompany default Single Cement. v1.2.2 used Single Cement only. Other candidates remain research.
 
 ### Gate A — structural break acceptance
 
@@ -98,15 +99,16 @@ Rejecting a small break does not automatically classify it as a liquidity sweep.
 
 ### Gate B — impulse completion / Cement confirmation
 
-The immediate task is to define and illustrate the single-Cement baseline, two-Cement, consecutive-Cement and first-Cement-boundary alternatives. Pivot, retracement and ATR-correction variants remain in the wider research pool.
+The three policies are delivered in v1.3.0; see [Impulse completion modes](CEMENT_COMPLETION.md). A strict new extreme resets candidate/count; boundary mode uses a later close beyond the first candidate wick boundary. Consecutive-only Cement remains unimplemented. Pivot, retracement and ATR-correction variants remain in the wider research pool.
 
 The current default is one opposite Cement with lookback 1. The existing lookback N compares one close with every high/low of the preceding N bars. It is not a count of confirmation candles and its window is not reset at the start of an impulse.
 
 | Experiment | Candidate rule | Decisions needed |
 | --- | --- | --- |
-| B1 — Two Cement | Complete on a second opposite-direction Cement | Whether intervening non-Cement bars are allowed; candidate reset, expiry and new-extreme handling |
+| B1 — Two Cement | Delivered v1.3.0: second opposite Cement, intervening bars allowed | Strict new extreme resets count; no timeout; validate changed swing chain |
 | Consecutive Cement | Require consecutive opposite-direction Cement candles | Consecutive means adjacent chart bars; define reset and availability |
-| First-Cement boundary confirmation | First opposite Cement creates a candidate; a later candle confirms beyond a selected boundary of that first Cement | High/low versus close reference, whether the second candle must itself be Cement, intervening bars and invalidation |
+| First-Cement boundary confirmation | Delivered v1.3.0: later close beyond first opposite Cement wick low/high | Later bar need not be Cement; strict new extreme resets candidate; no timeout |
+| Fractal-only completion | Future alternative independent of Cement | Define left/right windows, confirmation delay, bootstrap and interruption rules; not implemented |
 | B2 — Cement + Pivot | Seek a pivot confirmation after Cement | Pivot rule, future-bar requirement and explicit added confirmation delay |
 | B3 — Retracement confirmation | Require a defined retracement, e.g. an illustrative 0.236 | Working/reference anchors, logarithmic level, source price and re-anchoring behavior |
 | B4 — ATR correction | Require an opposite movement of a minimum ATR size | Measurement anchor, volatility sample, threshold and invalidation |

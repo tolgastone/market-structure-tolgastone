@@ -7,7 +7,7 @@ MST displays structural swings, boundary breaks, Cement markers, logarithmic Fib
 1. Open a standard candlestick chart in TradingView.
 2. Copy the complete contents of [`ms_tolgastone.pine`](../ms_tolgastone.pine) into a new Pine Editor indicator script.
 3. Save the script and add it to the chart. No separate library is required.
-4. Start with **Break source = Close**, **Break tolerance = None** and **Cement lookback bars = 1**, the current defaults.
+4. Start with **Break source = Close**, **Break tolerance = None** and **Cement lookback bars = 1** and **Impulse completion = Single Cement**, the current defaults.
 5. Leave **Color mode = Auto** to follow the chart background, or select **Custom** to use the color controls. The default view shows swings, extreme markers, breaks, boundaries and Swing Zones. EQ and OTE provide the dedicated 0.5 and 0.618–0.786 annotations; matching classic Fibonacci labels are omitted while these layers are enabled. Cement markers and FVG fragments start hidden. Open the indicator settings to choose additional layers. See the [parameter reference](PARAMETERS.md) for every control.
 
 The same Auto palette adapts to light and dark chart backgrounds; there are no separate Light/Dark presets.
@@ -24,7 +24,7 @@ The main sequence is **reference boundary break → impulse extreme tracking →
 | High / low circles | High / low endpoints of drawn swings |
 | BOS dashed line and label | Normal-path break in the reference swing's direction |
 | CHoCH dashed line and label | Normal-path break against the reference swing's direction |
-| Bullish / bearish triangles | Bullish / bearish Cement markers emitted by the structural engine; these do not mark every candle satisfying the Cement predicate |
+| Bullish / bearish triangles | Selected-policy completion markers; these do not mark every Cement candle. In First Cement Boundary mode the marked confirmation candle need not itself be Cement |
 | T above / below a bar (optional, v1.2.0) | A tested upward / downward source crossing filtered by the selected tolerance; not a sweep classification |
 | Two right-pointing boundary arrows | Working swing high and low, not necessarily the reference thresholds used to detect breaks |
 
@@ -44,7 +44,7 @@ See the [illustrated concepts](CONCEPTS.md) for candle examples and explanations
 
 With lookback 1, bullish Cement means the current close is strictly above the previous bar's high; bearish Cement means it is strictly below the previous bar's low. With a larger lookback, the close must exceed every high or fall below every low in that preceding window.
 
-Lookback 3 does not mean three consecutive Cement candles. An UP impulse normally completes on bearish Cement; a DOWN impulse normally completes on bullish Cement. Hiding markers does not disable this logic.
+Lookback 3 does not mean three consecutive Cement candles. Single Cement completes an UP impulse on bearish Cement and a DOWN impulse on bullish Cement. v1.3.0 also offers Two Cements and First Cement Boundary; these can change the swing chain. See [Impulse completion modes](CEMENT_COMPLETION.md) before comparing them. Hiding markers does not disable the selected policy.
 
 ## Swing Zones (v1.1.0)
 

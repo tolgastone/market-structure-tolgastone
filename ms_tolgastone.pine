@@ -54,6 +54,14 @@ i_cementLength       = input.int(
     display = display.data_window
 )
 
+// Experimental impulse completion policies; initial direction still uses one Cement.
+i_completionMode = input.string(
+    "Single Cement", "Impulse completion", ["Single Cement", "Two Cements", "First Cement Boundary"],
+    group = group_STRUCTURAL,
+    tooltip = "Single Cement preserves the baseline. Two Cements counts two opposite Cements, allowing intervening bars. First Cement Boundary waits for a later close beyond the first opposite Cement's wick low/high; that later bar need not be Cement. A strictly new impulse extreme resets the candidate/count. No timeout. Initial direction and structural interruptions are unchanged.",
+    display = display.data_window
+)
+
 // Optional penetration filter. None retains the original strict-crossing behavior.
 i_breakTolerance = input.string(
     "None", "Break tolerance", ["None", "Percent", "ATR"], group = group_STRUCTURAL,
@@ -133,7 +141,7 @@ i_showFilteredBreaks = input.bool(
 )
 i_showCements           = input.bool(
     false, "Cement markers", group = group_VISUAL,
-    tooltip = "Show opposite-Cement completion markers. Hiding markers does not disable Cement calculations."
+    tooltip = "Show impulse-completion markers. In First Cement Boundary mode the marked confirmation bar need not itself be Cement. Hiding markers does not disable calculations."
 )
 i_showBreaks            = input.bool(
     true, "BOS / CHoCH labels", group = group_VISUAL,
@@ -593,6 +601,30 @@ is_bullish_cemented_candle(int n) =>
         isTrue := isTrue and close > high[i]
     isTrue
 
+// Pure per-execution completion update. Pine rollback prevents intrabar double counting.
+// New extremes reset first; an opposite Cement on that same bar can seed a new candidate.
+get_impulse_completion(Point firstCement, int cementCount, bool oppositeCement, bool newExtreme, bool upward) =>
+    Point candidate = newExtreme ? na : firstCement
+    int count = newExtreme ? 0 : cementCount
+    bool complete = false
+    if i_completionMode == "Single Cement"
+        complete := oppositeCement
+        candidate := na
+        count := 0
+    else if i_completionMode == "Two Cements"
+        if oppositeCement
+            count += 1
+            if na(candidate)
+                candidate := get_point_current()
+            complete := count >= 2
+    else
+        if not na(candidate) and candidate.myIndex < bar_index
+            complete := upward ? close < candidate.myLow : close > candidate.myHigh
+        if na(candidate) and oppositeCement
+            candidate := get_point_current()
+            count := 1
+    [complete, candidate, count]
+
 // =============================================================================
 // FAIR VALUE GAP TRACKING
 // =============================================================================
@@ -641,6 +673,9 @@ var Point        lastHighPoint     = na
 var Point        lastLowPoint      = na
 var bool         isComingFromSwing = false
 var Fvg[]        fvgArr            = array.new<Fvg>()
+// Candidate belongs only to the active impulse; never shared across break transitions.
+var Point completionCandidate = na
+var int completionCementCount = 0
 
 // =============================================================================
 // DRAWING STORAGE
@@ -751,9 +786,13 @@ if currentState == State.LOOK_FOR_SWING
             isComingFromSwing := true
             currentState      := State.LOOK_FOR_BREAK
         else
-            if high > currentSwing.swingHigh.myHigh
+            bool newHigh = high > currentSwing.swingHigh.myHigh
+            if newHigh
                 currentSwing.swingHigh := get_point_current()
-            if isBearishCem
+            [completeUp, candidateUp, countUp] = get_impulse_completion(completionCandidate, completionCementCount, isBearishCem, newHigh, true)
+            completionCandidate := candidateUp
+            completionCementCount := countUp
+            if completeUp
                 if i_showCements
                     draw_cement_point(CementCandle.new(Direction.DOWN, get_point_current()))
                 draw_swing(currentSwing, i_lineWidth, structureColor, i_showHighLows)
@@ -769,9 +808,13 @@ if currentState == State.LOOK_FOR_SWING
             isComingFromSwing := true
             currentState      := State.LOOK_FOR_BREAK
         else
-            if low < currentSwing.swingLow.myLow
+            bool newLow = low < currentSwing.swingLow.myLow
+            if newLow
                 currentSwing.swingLow := get_point_current()
-            if isBullishCem
+            [completeDown, candidateDown, countDown] = get_impulse_completion(completionCandidate, completionCementCount, isBullishCem, newLow, false)
+            completionCandidate := candidateDown
+            completionCementCount := countDown
+            if completeDown
                 if i_showCements
                     draw_cement_point(CementCandle.new(Direction.UP, get_point_current()))
                 draw_swing(currentSwing, i_lineWidth, structureColor, i_showHighLows)
@@ -784,6 +827,8 @@ if currentState == State.LOOK_FOR_SWING
 // =============================================================================
 // Keep state blocks and up/down tests sequential: multiple paths may execute on one bar.
 if currentState == State.LOOK_FOR_BREAK
+    completionCandidate := na
+    completionCementCount := 0
     // Finalize the interrupted impulse before classifying the reverse break.
     if isComingFromSwing
         isComingFromSwing := false

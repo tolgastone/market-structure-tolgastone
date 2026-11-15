@@ -37,15 +37,15 @@ For the normal break path, classification compares break direction with referenc
 
 The dashed break line ends at the break bar. Its label is centered between the reference endpoint and the break bar, so the label's horizontal position is not the event time.
 
-## Cement confirms impulse completion
+## Cement and selectable impulse completion
 
 For length N, a bullish Cement closes strictly above **every high of the preceding N bars**. A bearish Cement closes strictly below **every low of the preceding N bars**. The default N is 1.
 
 N is not a count of consecutive Cement candles. Candle body color is not part of the predicate.
 
-During an UP impulse, the engine extends the high and normally completes the impulse on bearish Cement. During a DOWN impulse, it extends the low and normally completes on bullish Cement. The extreme update occurs before the Cement completion check, so a completion bar can also supply the final extreme.
+With default Single Cement, an UP impulse extends its high and normally completes on bearish Cement; a DOWN impulse extends its low and normally completes on bullish Cement. v1.3.0 also offers Two Cements and First Cement Boundary; see [Impulse completion modes](CEMENT_COMPLETION.md) for candidate resets, exact rules and timing. The extreme update occurs before the Cement completion check, so a completion bar can also supply the final extreme.
 
-Cement completes the normal impulse; it is not the normal structural-break trigger. Hiding Cement markers does not disable Cement calculations.
+Cement completes the normal impulse; it is not the normal structural-break trigger. Hiding Cement markers does not disable Cement calculations or the selected completion policy. In First Cement Boundary mode the completion marker can identify a non-Cement confirmation candle.
 
 ## A normal continuation example
 

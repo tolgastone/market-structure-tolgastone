@@ -18,13 +18,15 @@ Fibonacci levels use logarithmic prices: 0.5 is a geometric midpoint. FVG tracki
 
 Read [The MST approach](docs/ALGORITHM.md) for the structural cycle, an example, and the implementation details behind the drawings.
 
-**Current release:** [v1.2.2 — Drawing Reuse](https://github.com/tolgastone/market-structure-tolgastone/releases/tag/v1.2.2).
+**Current release:** [v1.3.0 — Cement Completion](https://github.com/tolgastone/market-structure-tolgastone/releases/tag/v1.3.0).
 
 v1.2.2 reuses working-swing boundary arrows, classic Fibonacci lines/labels and FVG display boxes across updates. Calculations and display-range rules are unchanged. See the [release notes](docs/releases/v1.2.2.md).
 
 v1.2.1 draws overlapping or touching same-direction FVG fragments once, avoiding stacked opacity. Stored gaps, mitigation and the logarithmic display range are unchanged. See the [release notes](docs/releases/v1.2.1.md).
 
 v1.2.0 adds optional Percent/ATR break tolerance and filtered-crossing T markers. None is the default and preserves the preceding structural behavior. These controls change break acceptance when enabled; see [Break tolerance](docs/BREAK_TOLERANCE.md) and the [v1.2.0 release notes](docs/releases/v1.2.0.md).
+
+v1.3.0 adds selectable Single Cement / Two Cements / First Cement Boundary impulse completion. Single Cement remains the default. See the [v1.3.0 release notes](docs/releases/v1.3.0.md). See [Impulse completion modes](docs/CEMENT_COMPLETION.md).
 
 ## Logarithmic price geometry
 
@@ -44,9 +46,10 @@ Boundary breaks, Cement predicates, and FVG creation/trimming still compare actu
 - [Usage guide](docs/USAGE.md): setup, chart reading, timing and common questions.
 - [Parameter reference](docs/PARAMETERS.md): all controls, defaults and effects.
 - [Break tolerance](docs/BREAK_TOLERANCE.md): optional Percent/ATR structural acceptance and T markers.
+- [Impulse completion modes](docs/CEMENT_COMPLETION.md): completion policies, candidate lifecycle and comparison examples.
 - [The MST approach](docs/ALGORITHM.md): structural logic and implementation details.
 - [Chart examples](examples/README.md): light/dark defaults and optional layers.
-- [Roadmap and research ideas](docs/ROADMAP.md): delivered releases, current work order and separate experiments. Next is Cement completion design/comparison; alerts are deferred, with OTE contact first when resumed.
+- [Roadmap and research ideas](docs/ROADMAP.md): delivered releases, current work order and separate experiments. v1.3.0 Cement Completion is delivered; alerts are deferred, with OTE contact first when resumed.
 - [Changelog](CHANGELOG.md): release notes.
 - [Contributing](CONTRIBUTING.md): reporting issues and proposing changes.
 - [TradingView description](docs/TRADINGVIEW_DESCRIPTION.md): publication text.
